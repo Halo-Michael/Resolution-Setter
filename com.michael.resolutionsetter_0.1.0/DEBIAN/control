@@ -1,0 +1,10 @@
+Package: com.michael.resolutionsetter
+Version: 0.1.0
+Section: Tweaks
+Name: Resolution Setter
+Author: halo_michael <yc992147156@me.com>
+Sponsor: halo_michael <yc992147156@me.com>
+Maintainer: halo_michael <yc992147156@me.com>
+Depends: firmware (>= 9.0), coreutils, com.bingner.plutil
+Architecture: iphoneos-arm
+Description: Change your device resolution via Terminal! Usage: res <height> <width> . It will be like: res 1334 750 . or please type "resolution" or "res" in the terminal and follow the prompts.

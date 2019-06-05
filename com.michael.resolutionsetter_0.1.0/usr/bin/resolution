@@ -1,0 +1,72 @@
+#!/bin/bash
+
+if [[ ! $(/usr/bin/id -u) == 0 ]];then
+	echo "Run this as root!"
+	exit 1
+fi
+
+echo "Welcome to use Apple Resolution Setter"
+if [[ $# == 2 ]];then
+	tmpheight=$1
+	tmpwidth=$2
+	expr $tmpheight + 0 &>/dev/null
+	return1=$?
+	expr $tmpwidth + 0 &>/dev/null
+	return2=$?
+	if [[ $return1 == 0 && $return2 == 0 ]];then
+		resolutionsetter() {
+		height=$tmpheight
+		width=$tmpwidth
+		read -p "Are you sure you want to set the resolution to ${height}x${width}?(y/n)" choice
+		}
+	else
+		resolutionsetter() {
+		read -p "Please choice a height to set:" height
+		read -p "Please choice a width to set:" width
+		read -p "Are you sure you want to set the resolution to ${height}x${width}?(y/n)" choice
+		}
+	fi
+else
+	resolutionsetter() {
+	read -p "Please choice a height to set:" height
+	read -p "Please choice a width to set:" width
+	read -p "Are you sure you want to set the resolution to ${height}x${width}?(y/n)" choice
+	}
+fi
+
+while [[ 1 == 1 ]]
+do
+resolutionsetter
+if [ "$choice"x = "y"x ];then
+	expr $height + 0 &>/dev/null
+	returnheight=$?
+	expr $width + 0 &>/dev/null
+	returnwidth=$?
+	if [[ ! $returnheight == 0 || ! $returnwidth == 0 ]];then
+		echo "Invalid parameters, you may have no idea what you are doing, now exit."
+		sleep 2
+		exit 1
+	fi
+	if [ ! -f "/var/mobile/Library/Preferences/com.apple.iokit.IOMobileGraphicsFamily.plist" ]; then
+		plutil -create /var/mobile/Library/Preferences/com.apple.iokit.IOMobileGraphicsFamily.plist
+		chown mobile:mobile /var/mobile/Library/Preferences/com.apple.iokit.IOMobileGraphicsFamily.plist
+		chmod 0600 /var/mobile/Library/Preferences/com.apple.iokit.IOMobileGraphicsFamily.plist
+	fi
+	plutil -key canvas_height -int $height /var/mobile/Library/Preferences/com.apple.iokit.IOMobileGraphicsFamily.plist
+	plutil -key canvas_width -int $width /var/mobile/Library/Preferences/com.apple.iokit.IOMobileGraphicsFamily.plist
+	echo "Successfully set the resolution to ${height}x${width}, the device will be respring."
+	sleep 1
+	killall -9 cfprefsd && killall -9 backboardd
+	exit 0
+elif [ "$choice"x = "n"x ];then
+	resolutionsetter() {
+	read -p "Please choice a height to set:" height
+	read -p "Please choice a width to set:" width
+	read -p "Are you sure you want to set the resolution to ${height}x${width}?(y/n)" choice
+	}
+else
+	echo "Invalid parameters, you may have no idea what you are doing, now exit."
+	sleep 2
+	exit 1
+fi
+done
