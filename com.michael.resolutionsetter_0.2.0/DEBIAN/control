@@ -7,4 +7,4 @@ Sponsor: halo_michael <yc992147156@me.com>
 Maintainer: halo_michael <yc992147156@me.com>
 Depends: firmware (>= 9.0), coreutils, com.bingner.plutil
 Architecture: iphoneos-arm
-Description: Change your device resolution via Terminal! Usage: res [height] [width] [-w] [-y]. Please type "res -h" or "res --help" on Terminal for more messages.
+Description: Change your device resolution via Terminal! Usage: res|resolution [height] [width] [-w] [-y]. Please type "res|resolution -h|--help" on Terminal to get more messages.
