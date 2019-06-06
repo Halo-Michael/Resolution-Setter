@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [[ ! $(/usr/bin/id -u) == 0 ]];then
+if [[ ! $(/usr/bin/id -u) == "0" ]];then
 	echo "Run this as root!"
 	exit 1
 fi
@@ -19,11 +19,11 @@ fault_to_exit (){
 	exit 1
 }
 
-if [[ ! $# == 0 && ! $# == 1 && ! $# == 2 && ! $# == 3 ]];then
+if [[ ! $# == "0" && ! $# == "1" && ! $# == "2" && ! $# == "3" ]];then
 	fault_to_exit
 fi
 
-if [[ $# == 1 ]];then
+if [[ $# == "1" ]];then
 	if [[ $1 == "-h" || $1 == "--help" ]];then
 		echo "Usage: res [height] [width] [-w]"
 		echo "or resolution [height] [width] [-w]"
@@ -35,8 +35,8 @@ if [[ $# == 1 ]];then
 	fi
 fi
 
-if [[ $# == 2 || $# == 3 ]];then
-	if [[ ! $3 == "-w" ]];then
+if [[ $# == "2" || $# == "3" ]];then
+	if [[ $# == "3" && ! $3 == "-w" ]];then
 		fault_to_exit
 	fi
 	tmpheight=$1
@@ -45,7 +45,7 @@ if [[ $# == 2 || $# == 3 ]];then
 	return1=$?
 	expr $tmpwidth + 0 &>/dev/null
 	return2=$?
-	if [[ $return1 == 0 && $return2 == 0 ]];then
+	if [[ $return1 == "0" && $return2 == "0" ]];then
 		resolutionsetter() {
 			height=$tmpheight
 			width=$tmpwidth
@@ -54,19 +54,17 @@ if [[ $# == 2 || $# == 3 ]];then
 	else
 		fault_to_exit
 	fi
-else
-	fault_to_exit
 fi
 
 while [[ 1 == 1 ]]
 do
 resolutionsetter
-if [[ "$choice" == y ]];then
+if [[ "$choice" == "y" || "$choice" == "Y" ]];then
 	expr $height + 0 &>/dev/null
 	returnheight=$?
 	expr $width + 0 &>/dev/null
 	returnwidth=$?
-	if [[ ! $returnheight == 0 || ! $returnwidth == 0 ]];then
+	if [[ ! $returnheight == "0" || ! $returnwidth == "0" ]];then
 		fault_to_exit
 	fi
 	if [ ! -f "/var/mobile/Library/Preferences/com.apple.iokit.IOMobileGraphicsFamily.plist" ]; then
@@ -77,7 +75,7 @@ if [[ "$choice" == y ]];then
 	plutil -key canvas_height -int $height /var/mobile/Library/Preferences/com.apple.iokit.IOMobileGraphicsFamily.plist
 	plutil -key canvas_width -int $width /var/mobile/Library/Preferences/com.apple.iokit.IOMobileGraphicsFamily.plist
 	sleep 1
-     	if [[ ! $# == 3 ]];then
+     	if [[ ! $# == "3" ]];then
 		echo "Successfully set the resolution to ${height}x${width}, the device will be respring."
 		killall -9 cfprefsd && killall -9 backboardd
 	else
@@ -85,7 +83,7 @@ if [[ "$choice" == y ]];then
 		echo "Successfully set the resolution to ${height}x${width}, you should manual respring your drvice."
 	fi
 	exit 0
-elif [[ "$choice" = n ]];then
+elif [[ "$choice" == "n" || "$choice" == "N" ]];then
 	resolutionsetter() {
 		read -p "Please choice a height to set:" height
 		read -p "Please choice a width to set:" width
