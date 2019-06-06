@@ -73,7 +73,7 @@ if [[ $# == "2" || $# == "3" || $# == "4" ]];then
 	fi
 fi
 
-while [[ 1 == 1 ]]
+while :
 do
 resolutionsetter
 if [[ "$choice" == "y" || "$choice" == "Y" || "$passconfirm" == "1" ]];then
