@@ -29,8 +29,7 @@ fi
 
 if [[ $# == "1" ]];then
 	if [[ $1 == "-h" || $1 == "--help" ]];then
-		echo "Usage: res [height] [width] [-w] [-y]"
-		echo "or resolution [height] [width] [-w] [-y]"
+		echo "Usage: res|resolution [height] [width] [-w] [-y]"
 		echo
 		echo "-w   Set resolution without auto respring. You may need to manual respring."
 		echo "-y   Pass the confirm message."
