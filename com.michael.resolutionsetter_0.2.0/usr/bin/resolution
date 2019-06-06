@@ -7,10 +7,14 @@ fi
 
 echo "Welcome to use Apple Resolution Setter"
 
+passconfirm=0
+
 resolutionsetter() {
 	read -p "Please choice a height to set:" height
 	read -p "Please choice a width to set:" width
-	read -p "Are you sure you want to set the resolution to ${height}x${width}?(y/n)" choice
+	if [[ ! $passconfirm == "1" ]];then
+		read -p "Are you sure you want to set the resolution to ${height}x${width}?(y/n)" choice
+	fi
 }
 
 fault_to_exit (){
@@ -19,25 +23,37 @@ fault_to_exit (){
 	exit 1
 }
 
-if [[ ! $# == "0" && ! $# == "1" && ! $# == "2" && ! $# == "3" ]];then
+if [[ ! $# == "0" && ! $# == "1" && ! $# == "2" && ! $# == "3" && ! $# == "4" ]];then
 	fault_to_exit
 fi
 
 if [[ $# == "1" ]];then
 	if [[ $1 == "-h" || $1 == "--help" ]];then
-		echo "Usage: res [height] [width] [-w]"
-		echo "or resolution [height] [width] [-w]"
+		echo "Usage: res [height] [width] [-w] [-y]"
+		echo "or resolution [height] [width] [-w] [-y]"
 		echo
 		echo "-w   Set resolution without auto respring. You may need to manual respring."
+		echo "-y   Pass the confirm message."
 		exit 0
 	else
 		fault_to_exit
 	fi
 fi
 
-if [[ $# == "2" || $# == "3" ]];then
-	if [[ $# == "3" && ! $3 == "-w" ]];then
+if [[ $# == "2" || $# == "3" || $# == "4" ]];then
+	if [[ $# == "3" && ! $3 == "-w" && ! $3 == "-y" ]];then
 		fault_to_exit
+	else
+		if [[ $# == "3" && $3 == "-y" ]];then
+			passconfirm=1
+		fi
+	fi
+	if [[ $# == "4" && ! $4 == "-y" ]];then
+		fault_to_exit
+	else
+		if [[ $# == "4" ]];then
+			passconfirm=1
+		fi
 	fi
 	tmpheight=$1
 	tmpwidth=$2
@@ -49,7 +65,9 @@ if [[ $# == "2" || $# == "3" ]];then
 		resolutionsetter() {
 			height=$tmpheight
 			width=$tmpwidth
-			read -p "Are you sure you want to set the resolution to ${height}x${width}?(y/n)" choice
+			if [[ ! $passconfirm == "1" ]];then
+				read -p "Are you sure you want to set the resolution to ${height}x${width}?(y/n)" choice
+			fi
 		}
 	else
 		fault_to_exit
@@ -59,7 +77,7 @@ fi
 while [[ 1 == 1 ]]
 do
 resolutionsetter
-if [[ "$choice" == "y" || "$choice" == "Y" ]];then
+if [[ "$choice" == "y" || "$choice" == "Y" || "$passconfirm" == "1" ]];then
 	expr $height + 0 &>/dev/null
 	returnheight=$?
 	expr $width + 0 &>/dev/null
@@ -75,7 +93,7 @@ if [[ "$choice" == "y" || "$choice" == "Y" ]];then
 	plutil -key canvas_height -int $height /var/mobile/Library/Preferences/com.apple.iokit.IOMobileGraphicsFamily.plist
 	plutil -key canvas_width -int $width /var/mobile/Library/Preferences/com.apple.iokit.IOMobileGraphicsFamily.plist
 	sleep 1
-     	if [[ ! $# == "3" ]];then
+     	if [[ ! $3 == "-w" ]];then
 		echo "Successfully set the resolution to ${height}x${width}, the device will be respring."
 		killall -9 cfprefsd && killall -9 backboardd
 	else
@@ -87,7 +105,9 @@ elif [[ "$choice" == "n" || "$choice" == "N" ]];then
 	resolutionsetter() {
 		read -p "Please choice a height to set:" height
 		read -p "Please choice a width to set:" width
-		read -p "Are you sure you want to set the resolution to ${height}x${width}?(y/n)" choice
+ 		if [[ ! $passconfirm == "1" ]];then
+			read -p "Are you sure you want to set the resolution to ${height}x${width}?(y/n)" choice
+		fi
 	}
 else
 	fault_to_exit
