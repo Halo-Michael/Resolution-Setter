@@ -6,6 +6,15 @@ if [[ ! $(/usr/bin/id -u) == 0 ]];then
 fi
 
 echo "Welcome to use Apple Resolution Setter"
+
+if [[ $# == 1 ]];then
+	if [[ $1 == "-h" || $1 == "--help" ]];then
+		echo "Usage: res [height] [width]"
+		echo "or resolution [height] [width]"
+		echo
+	fi
+fi
+
 if [[ $# == 2 ]];then
 	tmpheight=$1
 	tmpwidth=$2
