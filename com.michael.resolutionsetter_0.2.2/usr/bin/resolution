@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [[ ! $(/usr/bin/id -u) == "0" ]];then
+if [[ ! `id -u` == "0" ]];then
 	echo "Run this as root!"
 	exit 1
 fi
@@ -23,7 +23,7 @@ fault_to_exit (){
 	exit 1
 }
 
-if [[ ! $# == "0" && ! $# == "1" && ! $# == "2" && ! $# == "3" && ! $# == "4" ]];then
+if [[ $# > "4" ]];then
 	fault_to_exit
 fi
 
@@ -39,7 +39,7 @@ if [[ $# == "1" ]];then
 	fi
 fi
 
-if [[ $# == "2" || $# == "3" || $# == "4" ]];then
+if [[ $# -ge "2" && $# -le "4" ]];then
 	if [[ $# == "3" && ! $3 == "-w" && ! $3 == "-y" ]];then
 		fault_to_exit
 	else
