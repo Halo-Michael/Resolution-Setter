@@ -84,7 +84,7 @@ if [[ $choice == 'y' || $choice == 'Y' || $passconfirm == '1' ]];then
 	if [[ ! $returnheight == '0' || ! $returnwidth == '0' ]];then
 		fault_to_exit
 	fi
-	if [ ! -f '/var/mobile/Library/Preferences/com.apple.iokit.IOMobileGraphicsFamily.plist' ]; then
+	if [ ! -f '/var/mobile/Library/Preferences/com.apple.iokit.IOMobileGraphicsFamily.plist' ];then
 		plutil -create /var/mobile/Library/Preferences/com.apple.iokit.IOMobileGraphicsFamily.plist
 		chown mobile:mobile /var/mobile/Library/Preferences/com.apple.iokit.IOMobileGraphicsFamily.plist
 		chmod 0600 /var/mobile/Library/Preferences/com.apple.iokit.IOMobileGraphicsFamily.plist
