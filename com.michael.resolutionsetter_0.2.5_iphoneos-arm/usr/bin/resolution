@@ -91,10 +91,14 @@ if [[ $choice == 'y' || $choice == 'Y' || $passconfirm == '1' ]];then
 	fi
 	plutil -key canvas_height -int $height /var/mobile/Library/Preferences/com.apple.iokit.IOMobileGraphicsFamily.plist
 	plutil -key canvas_width -int $width /var/mobile/Library/Preferences/com.apple.iokit.IOMobileGraphicsFamily.plist
-	sleep 1
      	if [[ ! $3 == '-w' ]];then
+		sleep 1
 		echo "Successfully set the resolution to ${height}x${width}, the device will be respring."
-		killall -9 cfprefsd && killall -9 backboardd
+		if [[ -f /usr/bin/sbreload ]];then
+			killall -9 cfprefsd && sbreload
+		else
+			killall -9 cfprefsd && killall -9 backboardd
+		fi
 	else
 		killall -9 cfprefsd
 		echo "Successfully set the resolution to ${height}x${width}, you should manual respring your drvice."
