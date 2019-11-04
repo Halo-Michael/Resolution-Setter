@@ -1,4 +1,5 @@
 #include <spawn.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -59,7 +60,7 @@ int main(int argc, char **argv)
         usage();
     }
     
-    int use_args = 0;
+    bool use_args = 0;
     
     char height[4], width[4];
     if (argc == 1) {
@@ -93,7 +94,7 @@ int main(int argc, char **argv)
         use_args = 1;
     }
     
-    int pass_confirm = 0;
+    bool pass_confirm = 0;
     
     if (argc == 4) {
         if (strcmp(argv[3], "-y") == 0) {
