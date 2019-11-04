@@ -33,7 +33,7 @@ int do_check(const char *num)
     if (strcmp(num, "0") == 0) {
         return 0;
     }
-    char* p = num;
+    const char* p = num;
     if (*p < '1' || *p > '9') {
         return 1;
     } else {
@@ -65,13 +65,13 @@ int main(int argc, char **argv)
     char height[4], width[4];
     if (argc == 1) {
         printf("Please choice a height to set:");
-        scanf("%s", &height);
+        scanf("%s", height);
         if (do_check(height) != 0) {
             printf("Invalid parameters, you may have no idea what you are doing, now exit.\n");
             exit(1);
         }
         printf("Please choice a width to set:");
-        scanf("%s", &width);
+        scanf("%s", width);
         if (do_check(width) != 0) {
             printf("Invalid parameters, you may have no idea what you are doing, now exit.\n");
             exit(1);
@@ -115,24 +115,24 @@ int main(int argc, char **argv)
         } else {
             printf("Are you sure you want to set the resolution to %sx%s?(y/n)", argv[1], argv[2]);
         }
-        confirm = getchar();
+        scanf("\n%c", &confirm);
         if (confirm == 'n' || confirm == 'N') {
             while (confirm != 'y' && confirm != 'Y') {
                 printf("Please choice a height to set:");
-                scanf("%s", &height);
+                scanf("%s", height);
                 if (do_check(height) != 0) {
                     printf("Invalid parameters, you may have no idea what you are doing, now exit.\n");
                     exit(1);
                 }
                 printf("Please choice a width to set:");
-                scanf("%s", &width);
+                scanf("%s", width);
                 if (do_check(width) != 0) {
                     printf("Invalid parameters, you may have no idea what you are doing, now exit.\n");
                     exit(1);
                 }
                 use_args = 0;
                 printf("Are you sure you want to set the resolution to %sx%s?(y/n)", height, width);
-                confirm = getchar();
+                scanf("\n%c", &confirm);
                 if (confirm != 'y' && confirm != 'Y' && confirm != 'n' && confirm != 'N') {
                     printf("Invalid parameters, you may have no idea what you are doing, now exit.\n");
                     exit(1);
