@@ -1,5 +1,5 @@
 TARGET = Resolution Setter
-VERSION = 0.3.1
+VERSION = 0.3.2
 CC = xcrun -sdk iphoneos clang -arch armv7 -arch arm64 -miphoneos-version-min=9.0
 LDID = ldid
 

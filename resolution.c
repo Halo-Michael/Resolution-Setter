@@ -109,30 +109,36 @@ int main(int argc, char **argv)
     }
     
     if (! pass_confirm) {
-        char confirm[1];
+        char confirm;
         if (! use_args) {
             printf("Are you sure you want to set the resolution to %sx%s?(y/n)", height, width);
         } else {
             printf("Are you sure you want to set the resolution to %sx%s?(y/n)", argv[1], argv[2]);
         }
-        scanf("%s", &confirm);
-        if (strcmp(confirm, "n") == 0 || strcmp(confirm, "N") == 0) {
-            while (strcmp(confirm, "y") != 0 && strcmp(confirm, "Y") != 0) {
+        confirm = getchar();
+        if (confirm == 'n' || confirm == 'N') {
+            while (confirm != 'y' && confirm != 'Y') {
                 printf("Please choice a height to set:");
-                if (scanf("%s", &height) != 1) {
+                scanf("%s", &height);
+                if (do_check(height) != 0) {
                     printf("Invalid parameters, you may have no idea what you are doing, now exit.\n");
                     exit(1);
                 }
                 printf("Please choice a width to set:");
-                if (scanf("%s", &width) != 1) {
+                scanf("%s", &width);
+                if (do_check(width) != 0) {
                     printf("Invalid parameters, you may have no idea what you are doing, now exit.\n");
                     exit(1);
                 }
                 use_args = 0;
                 printf("Are you sure you want to set the resolution to %sx%s?(y/n)", height, width);
-                scanf("%s", &confirm);
+                confirm = getchar();
+                if (confirm != 'y' && confirm != 'Y' && confirm != 'n' && confirm != 'N') {
+                    printf("Invalid parameters, you may have no idea what you are doing, now exit.\n");
+                    exit(1);
+                }
             }
-        } else if (strcmp(confirm, "y") != 0 && strcmp(confirm, "Y") != 0) {
+        } else if (confirm != 'y' && confirm != 'Y') {
             printf("Invalid parameters, you may have no idea what you are doing, now exit.\n");
             exit(1);
         }
