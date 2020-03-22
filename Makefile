@@ -1,26 +1,13 @@
-TARGET = Resolution Setter
-VERSION = 0.3.2
-CC = xcrun -sdk iphoneos clang -arch armv7 -arch arm64 -miphoneos-version-min=9.0
-LDID = ldid
+export TARGET=iphone:clang::9.0
+export ARCHS=armv7 arm64 arm64e
+export DEBUG=0
 
-.PHONY: all clean
+include $(THEOS)/makefiles/common.mk
 
-all: clean resolution
-	mkdir com.michael.resolutionsetter-$(VERSION)_iphoneos-arm
-	mkdir com.michael.resolutionsetter-$(VERSION)_iphoneos-arm/DEBIAN
-	cp control com.michael.resolutionsetter-$(VERSION)_iphoneos-arm/DEBIAN
-	mkdir com.michael.resolutionsetter-$(VERSION)_iphoneos-arm/usr
-	mkdir com.michael.resolutionsetter-$(VERSION)_iphoneos-arm/usr/bin
-	mv resolution com.michael.resolutionsetter-$(VERSION)_iphoneos-arm/usr/bin
-	ln -s resolution res
-	mv res com.michael.resolutionsetter-$(VERSION)_iphoneos-arm/usr/bin
-	dpkg -b com.michael.resolutionsetter-$(VERSION)_iphoneos-arm
+TOOL_NAME = resolution
 
-resolution: clean
-	$(CC) resolution.c -o resolution
-	strip resolution
-	$(LDID) -Sentitlements.xml resolution
+$(TOOL_NAME)_FILES = main.m
+$(TOOL_NAME)_CFLAGS = -fobjc-arc
+$(TOOL_NAME)_CODESIGN_FLAGS = -Sentitlements.xml
 
-clean:
-	rm -rf com.michael.resolutionsetter-*
-	rm -f resolution
+include $(THEOS_MAKE_PATH)/tool.mk
