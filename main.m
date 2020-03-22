@@ -164,6 +164,9 @@ int main(int argc, const char **argv, const char **envp) {
     if (access("/var/mobile/Library/Preferences/com.apple.iokit.IOMobileGraphicsFamily.plist", F_OK) == 0) {
         remove("/var/mobile/Library/Preferences/com.apple.iokit.IOMobileGraphicsFamily.plist");
     }
+    if (access("/var/mobile/Library/Preferences/com.michael.iokit.IOMobileGraphicsFamily.plist", F_OK) == 0) {
+        remove("/var/mobile/Library/Preferences/com.michael.iokit.IOMobileGraphicsFamily.plist");
+    }
     
     NSString *canvas_height;
     NSString *canvas_width;
@@ -184,10 +187,25 @@ int main(int argc, const char **argv, const char **envp) {
     fprintf(fp, "</plist>\n");
     fclose(fp);
     
+    fp = fopen("/var/mobile/Library/Preferences/com.michael.iokit.IOMobileGraphicsFamily.plist","a+");
+    fprintf(fp, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+    fprintf(fp, "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n");
+    fprintf(fp, "<plist version=\"1.0\">\n");
+    fprintf(fp, "<dict>\n");
+    fprintf(fp, "</dict>\n");
+    fprintf(fp, "</plist>\n");
+    fclose(fp);
+    
     modifyPlist(@"/var/mobile/Library/Preferences/com.apple.iokit.IOMobileGraphicsFamily.plist", ^(id plist) {
         plist[@"canvas_height"] = [NSNumber numberWithInteger:[canvas_height integerValue]];
     });
+    modifyPlist(@"/var/mobile/Library/Preferences/com.michael.iokit.IOMobileGraphicsFamily.plist", ^(id plist) {
+        plist[@"canvas_height"] = [NSNumber numberWithInteger:[canvas_height integerValue]];
+    });
     modifyPlist(@"/var/mobile/Library/Preferences/com.apple.iokit.IOMobileGraphicsFamily.plist", ^(id plist) {
+        plist[@"canvas_width"] = [NSNumber numberWithInteger:[canvas_width integerValue]];
+    });
+    modifyPlist(@"/var/mobile/Library/Preferences/com.michael.iokit.IOMobileGraphicsFamily.plist", ^(id plist) {
         plist[@"canvas_width"] = [NSNumber numberWithInteger:[canvas_width integerValue]];
     });
     
