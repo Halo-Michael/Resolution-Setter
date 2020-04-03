@@ -12,4 +12,4 @@ before_install:
   - sudo git clone --recursive https://github.com/theos/theos.git $THEOS
 
 script:
-  - make package
+  - make all
