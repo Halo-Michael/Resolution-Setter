@@ -5,6 +5,6 @@ Name: Resolution Setter
 Author: halo_michael <yc992147156@me.com>
 Sponsor: halo_michael <yc992147156@me.com>
 Maintainer: halo_michael <yc992147156@me.com>
-Depends: firmware (>= 9.0)
+Depends: firmware (>= 9.0), coreutils
 Architecture: iphoneos-arm
 Description: Change your device resolution via Terminal! Usage: res|resolution [height] [width] [OPTIONS...]. Please type "res|resolution -h" on Terminal to get more messages.
