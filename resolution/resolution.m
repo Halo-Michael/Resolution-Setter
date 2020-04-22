@@ -5,25 +5,25 @@ void usage() {
     printf("\t-y\tPass the confirm message.\n");
 }
 
-int do_check(const char *num)
+bool do_check(const char *num)
 {
     if (strcmp(num, "0") == 0) {
-        return 0;
+        return true;
     }
     const char* p = num;
     if (*p < '1' || *p > '9') {
-        return 1;
+        return false;
     } else {
         p++;
     }
     while (*p) {
         if(*p < '0' || *p > '9') {
-            return 1;
+            return false;
         } else {
             p++;
         }
     }
-    return 0;
+    return true;
 }
 
 bool modifyPlist(NSString *filename, void (^function)(id)) {
@@ -52,167 +52,183 @@ bool modifyPlist(NSString *filename, void (^function)(id)) {
     return true;
 }
 
-int main(int argc, const char **argv, const char **envp) {
+int main(int argc, char **argv) {
     if (getuid() != 0) {
         setuid(0);
     }
-    
+
     if (getuid() != 0) {
         printf("Can't set uid as 0.\n");
         return 1;
     }
-    
+
     if (argc == 2 || argc > 5) {
         usage();
         return 1;
     }
-    
-    bool use_args = NO;
-    
-    char height[4], width[4];
-    if (argc == 1) {
-        printf("Please choice a height to set:");
-        scanf("%s", height);
-        if (do_check(height) != 0) {
-            printf("Invalid parameters, you may have no idea what you are doing, now exit.\n");
-            return 1;
-        }
-        printf("Please choice a width to set:");
-        scanf("%s", width);
-        if (do_check(width) != 0) {
-            printf("Invalid parameters, you may have no idea what you are doing, now exit.\n");
-            return 1;
-        }
-    }
-    
-    bool pass_confirm = NO;
-    bool auto_respring = YES;
-    
-    if (argc > 2) {
-        if (do_check(argv[1]) != 0 || do_check(argv[2]) != 0) {
-            printf("Invalid parameters, you may have no idea what you are doing, now exit.\n");
-            return 1;
-        }
-        
-        NSMutableArray *args = [[[NSProcessInfo processInfo] arguments] mutableCopy];
-        [args removeObjectAtIndex:0];
-        NSPredicate *pred = [NSPredicate predicateWithFormat:@"SELF beginswith '-'"];
-        NSArray *dashedArgs = [args filteredArrayUsingPredicate:pred];
-        for (NSString *argument in dashedArgs) {
-            if (![argument caseInsensitiveCompare:@"-h"]) {
-                usage();
+
+    if (argc == 1 || argc > 2) {
+        if (argc > 2) {
+            if (do_check(argv[1]) == false || do_check(argv[2]) == false) {
+                printf("Invalid parameters, you may have no idea what you are doing, now exit.\n");
+                return 1;
+            } else if (strlen(argv[1]) > 4 || strlen(argv[2]) > 4) {
+                printf("The resolution is too high, you may have no idea what you are doing, now exit.\n");
+                return 1;
+            } else if (strlen(argv[1]) < 3 || strlen(argv[2]) < 3) {
+                printf("The resolution is too low, you may have no idea what you are doing, now exit.\n");
                 return 1;
             }
-            if (![argument caseInsensitiveCompare:@"-w"]) {
-                auto_respring = NO;
-            }
-            if (![argument caseInsensitiveCompare:@"-y"]) {
-                pass_confirm = YES;
-            }
         }
-        use_args = YES;
-    }
-    
-    if (!pass_confirm) {
-        char confirm;
-        if (!use_args) {
-            printf("Are you sure you want to set the resolution to %sx%s?(y/n)", height, width);
-        } else {
-            printf("Are you sure you want to set the resolution to %sx%s?(y/n)", argv[1], argv[2]);
+
+        char *height, *width;
+
+        if (argc > 2) {
+            height = argv[1];
+            width = argv[2];
         }
-        scanf("\n%c", &confirm);
-        if (confirm == 'n' || confirm == 'N') {
-            while (confirm != 'y' && confirm != 'Y') {
-                printf("Please choice a height to set:");
-                scanf("%s", height);
-                if (do_check(height) != 0) {
+
+        for (int i = 1; i < argc; i++) {
+            if (argc > 2) {
+                if (strcmp(argv[i], "-y") == 0) {
+                    break;
+                }
+            }
+            if (argc == 1 || i == argc - 1) {
+                char confirm;
+                if (argc > 2) {
+                    printf("Are you sure you want to set the resolution to %sx%s?(y/n)", height, width);
+                    confirm = getchar();
+                    while (getchar() != '\n') {
+                        getchar();
+                    }
+                }
+                if (argc == 1 || confirm == 'n' || confirm == 'N') {
+                    while (confirm != 'y' && confirm != 'Y') {
+                        int strLen = 6;
+                        char ch = '\0';
+                        char *tmp_height = (char*)malloc(sizeof(char*) * strLen);
+                        int count = 0;
+                        printf("Please choice a height to set:");
+                        while (ch != '\n') {
+                            ch = getchar();
+                            count++;
+                            if (count >= strLen)
+                            {
+                                tmp_height = (char*)realloc(tmp_height, sizeof(char*) * (++strLen));
+                            }
+                            tmp_height[count - 1] = ch;
+                        }
+                        tmp_height[count - 1] = '\0';
+                        
+                        if (do_check(tmp_height) == false) {
+                            printf("Invalid parameters, you may have no idea what you are doing, now exit.\n");
+                            return 1;
+                        } else if (count > 5) {
+                            printf("Height is too high, you may have no idea what you are doing, now exit.\n");
+                            return 1;
+                        } else if (count < 4) {
+                            printf("Height is too low, you may have no idea what you are doing, now exit.\n");
+                            return 1;
+                        }
+                        height = tmp_height;
+
+                        strLen = 6;
+                        ch = '\0';
+                        char *tmp_width = (char*)malloc(sizeof(char*) * strLen);
+                        count = 0;
+                        printf("Please choice a width to set:");
+                        while (ch != '\n') {
+                            ch = getchar();
+                            count++;
+                            if (count >= strLen)
+                            {
+                                tmp_width = (char*)realloc(tmp_width, sizeof(char*) * (++strLen));
+                            }
+                            tmp_width[count - 1] = ch;
+                        }
+                        tmp_width[count - 1] = '\0';
+
+                        if (do_check(tmp_width) == false) {
+                            printf("Invalid parameters, you may have no idea what you are doing, now exit.\n");
+                            return 1;
+                        } else if (count > 5) {
+                            printf("Width is too high, you may have no idea what you are doing, now exit.\n");
+                            return 1;
+                        } else if (count < 4) {
+                            printf("Width is too low, you may have no idea what you are doing, now exit.\n");
+                            return 1;
+                        }
+                        width = tmp_width;
+
+                        printf("Are you sure you want to set the resolution to %sx%s?(y/n)", height, width);
+                        confirm = getchar();
+                        while (getchar() != '\n') {
+                            getchar();
+                        }
+                        if (confirm != 'y' && confirm != 'Y' && confirm != 'n' && confirm != 'N') {
+                            printf("Invalid parameters, you may have no idea what you are doing, now exit.\n");
+                            return 1;
+                        }
+                    }
+                } else if (confirm != 'y' && confirm != 'Y') {
                     printf("Invalid parameters, you may have no idea what you are doing, now exit.\n");
                     return 1;
                 }
-                printf("Please choice a width to set:");
-                scanf("%s", width);
-                if (do_check(width) != 0) {
-                    printf("Invalid parameters, you may have no idea what you are doing, now exit.\n");
-                    return 1;
-                }
-                use_args = 0;
-                printf("Are you sure you want to set the resolution to %sx%s?(y/n)", height, width);
-                scanf("\n%c", &confirm);
-                if (confirm != 'y' && confirm != 'Y' && confirm != 'n' && confirm != 'N') {
-                    printf("Invalid parameters, you may have no idea what you are doing, now exit.\n");
-                    return 1;
-                }
             }
-        } else if (confirm != 'y' && confirm != 'Y') {
-            printf("Invalid parameters, you may have no idea what you are doing, now exit.\n");
-            return 1;
         }
-    }
-    
-    if (access("/var/mobile/Library/Preferences/com.apple.iokit.IOMobileGraphicsFamily.plist", F_OK) == 0) {
-        remove("/var/mobile/Library/Preferences/com.apple.iokit.IOMobileGraphicsFamily.plist");
-    }
-    if (access("/var/mobile/Library/Preferences/com.michael.iokit.IOMobileGraphicsFamily.plist", F_OK) == 0) {
-        remove("/var/mobile/Library/Preferences/com.michael.iokit.IOMobileGraphicsFamily.plist");
-    }
-    
-    NSString *canvas_height;
-    NSString *canvas_width;
-    if (!use_args) {
-        canvas_height = [NSString stringWithUTF8String:height];
-        canvas_width = [NSString stringWithUTF8String:width];
-    } else {
-        canvas_height = [NSString stringWithUTF8String:argv[1]];
-        canvas_width = [NSString stringWithUTF8String:argv[2]];
-    }
-    
-    FILE *fp = fopen("/var/mobile/Library/Preferences/com.apple.iokit.IOMobileGraphicsFamily.plist","a+");
-    fprintf(fp, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-    fprintf(fp, "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n");
-    fprintf(fp, "<plist version=\"1.0\">\n");
-    fprintf(fp, "<dict>\n");
-    fprintf(fp, "</dict>\n");
-    fprintf(fp, "</plist>\n");
-    fclose(fp);
-    
-    fp = fopen("/var/mobile/Library/Preferences/com.michael.iokit.IOMobileGraphicsFamily.plist","a+");
-    fprintf(fp, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-    fprintf(fp, "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n");
-    fprintf(fp, "<plist version=\"1.0\">\n");
-    fprintf(fp, "<dict>\n");
-    fprintf(fp, "</dict>\n");
-    fprintf(fp, "</plist>\n");
-    fclose(fp);
-    
-    modifyPlist(@"/var/mobile/Library/Preferences/com.apple.iokit.IOMobileGraphicsFamily.plist", ^(id plist) {
-        plist[@"canvas_height"] = [NSNumber numberWithInteger:[canvas_height integerValue]];
-    });
-    modifyPlist(@"/var/mobile/Library/Preferences/com.michael.iokit.IOMobileGraphicsFamily.plist", ^(id plist) {
-        plist[@"canvas_height"] = [NSNumber numberWithInteger:[canvas_height integerValue]];
-    });
-    modifyPlist(@"/var/mobile/Library/Preferences/com.apple.iokit.IOMobileGraphicsFamily.plist", ^(id plist) {
-        plist[@"canvas_width"] = [NSNumber numberWithInteger:[canvas_width integerValue]];
-    });
-    modifyPlist(@"/var/mobile/Library/Preferences/com.michael.iokit.IOMobileGraphicsFamily.plist", ^(id plist) {
-        plist[@"canvas_width"] = [NSNumber numberWithInteger:[canvas_width integerValue]];
-    });
-    
-    if (!auto_respring) {
-        if (!use_args) {
-            printf("Successfully set the resolution to %sx%s, you should manual respring your drvice.\n", height, width);
-        } else {
-            printf("Successfully set the resolution to %sx%s, you should manual respring your drvice.\n", argv[1], argv[2]);
+
+        if (access("/var/mobile/Library/Preferences/com.apple.iokit.IOMobileGraphicsFamily.plist", F_OK) == 0) {
+            remove("/var/mobile/Library/Preferences/com.apple.iokit.IOMobileGraphicsFamily.plist");
         }
-        system("killall -9 cfprefsd");
-        return 0;
+        if (access("/var/mobile/Library/Preferences/com.michael.iokit.IOMobileGraphicsFamily.plist", F_OK) == 0) {
+            remove("/var/mobile/Library/Preferences/com.michael.iokit.IOMobileGraphicsFamily.plist");
+        }
+
+        FILE *fp = fopen("/var/mobile/Library/Preferences/com.apple.iokit.IOMobileGraphicsFamily.plist","a+");
+        fprintf(fp, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+        fprintf(fp, "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n");
+        fprintf(fp, "<plist version=\"1.0\">\n");
+        fprintf(fp, "<dict>\n");
+        fprintf(fp, "</dict>\n");
+        fprintf(fp, "</plist>\n");
+        fclose(fp);
+
+        fp = fopen("/var/mobile/Library/Preferences/com.michael.iokit.IOMobileGraphicsFamily.plist","a+");
+        fprintf(fp, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+        fprintf(fp, "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n");
+        fprintf(fp, "<plist version=\"1.0\">\n");
+        fprintf(fp, "<dict>\n");
+        fprintf(fp, "</dict>\n");
+        fprintf(fp, "</plist>\n");
+        fclose(fp);
+
+        modifyPlist(@"/var/mobile/Library/Preferences/com.apple.iokit.IOMobileGraphicsFamily.plist", ^(id plist) {
+            plist[@"canvas_height"] = [NSNumber numberWithInteger:[[NSString stringWithFormat:@"%s", height] integerValue]];
+        });
+        modifyPlist(@"/var/mobile/Library/Preferences/com.michael.iokit.IOMobileGraphicsFamily.plist", ^(id plist) {
+            plist[@"canvas_height"] = [NSNumber numberWithInteger:[[NSString stringWithFormat:@"%s", height] integerValue]];
+        });
+        modifyPlist(@"/var/mobile/Library/Preferences/com.apple.iokit.IOMobileGraphicsFamily.plist", ^(id plist) {
+            plist[@"canvas_width"] = [NSNumber numberWithInteger:[[NSString stringWithFormat:@"%s", width] integerValue]];
+        });
+        modifyPlist(@"/var/mobile/Library/Preferences/com.michael.iokit.IOMobileGraphicsFamily.plist", ^(id plist) {
+            plist[@"canvas_width"] = [NSNumber numberWithInteger:[[NSString stringWithFormat:@"%s", width] integerValue]];
+        });
+
+        NSString *command = @"killall -9 cfprefsd && killall -9 backboardd";
+        NSString *prints = [NSString stringWithFormat:@"Successfully set the resolution to %sx%s, the device will be respring.\n", height, width];
+
+        for (int i = 1; i < argc; i++) {
+            if (strcmp(argv[i], "-w") == 0) {
+                command = @"killall -9 cfprefsd";
+                prints = [NSString stringWithFormat:@"Successfully set the resolution to %sx%s, you should manual respring your drvice.\n", height, width];
+                break;
+            }
+        }
+
+        printf("%s", [prints UTF8String]);
+        int status = system([command UTF8String]);
+        return WEXITSTATUS(status);
     }
-    
-    if (!use_args) {
-        printf("Successfully set the resolution to %sx%s, the device will be respring.\n", height, width);
-    } else {
-        printf("Successfully set the resolution to %sx%s, the device will be respring.\n", argv[1], argv[2]);
-    }
-    sleep(1);
-    system("killall -9 cfprefsd && killall -9 backboardd");
-	return 0;
 }
