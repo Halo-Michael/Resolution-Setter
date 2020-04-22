@@ -87,7 +87,7 @@ int main(int argc, char **argv) {
         width = argv[2];
     }
 
-    for (int i = 1; i < argc; i++) {
+    for (int i = 0; i < argc; i++) {
         if (argc > 2) {
             if (strcmp(argv[i], "-y") == 0) {
                 break;
