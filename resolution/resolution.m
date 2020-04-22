@@ -216,7 +216,7 @@ int main(int argc, char **argv) {
             plist[@"canvas_width"] = [NSNumber numberWithInteger:[[NSString stringWithFormat:@"%s", width] integerValue]];
         });
 
-        NSString *command = @"killall -9 cfprefsd && killall -9 backboardd";
+        NSString *command = @"sleep 1 && killall -9 cfprefsd && killall -9 backboardd";
         NSString *prints = [NSString stringWithFormat:@"Successfully set the resolution to %sx%s, the device will be respring.\n", height, width];
 
         for (int i = 1; i < argc; i++) {
