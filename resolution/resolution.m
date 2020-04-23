@@ -5,8 +5,7 @@ void usage() {
     printf("\t-y\tPass the confirm message.\n");
 }
 
-bool do_check(const char *num)
-{
+bool do_check(const char *num) {
     if (strcmp(num, "0") == 0) {
         return true;
     }
