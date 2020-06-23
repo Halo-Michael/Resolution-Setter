@@ -1,6 +1,6 @@
 TARGET = Resolution Setter
-VERSION = 0.5.0
-CC = xcrun -sdk iphoneos clang -arch armv7 -arch arm64 -arch arm64e -miphoneos-version-min=9.0
+VERSION = 0.5.1
+CC = xcrun -sdk ${THEOS}/sdks/iPhoneOS13.0.sdk clang -arch armv7 -arch arm64 -arch arm64e -miphoneos-version-min=9.0
 LDID = ldid
 
 .PHONY: all clean
@@ -22,7 +22,7 @@ postinst: clean
 	$(LDID) -Sentitlements.xml postinst
 
 resolution: clean
-	sh make-resolution.sh
+	cd resolution && make
 
 clean:
 	rm -rf com.michael.resolutionsetter_* resolution/.theos

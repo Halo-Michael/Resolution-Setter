@@ -183,23 +183,8 @@ int main(int argc, char **argv) {
         remove("/var/mobile/Library/Preferences/com.michael.iokit.IOMobileGraphicsFamily.plist");
     }
 
-    FILE *fp = fopen("/var/mobile/Library/Preferences/com.apple.iokit.IOMobileGraphicsFamily.plist","a+");
-    fprintf(fp, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-    fprintf(fp, "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n");
-    fprintf(fp, "<plist version=\"1.0\">\n");
-    fprintf(fp, "<dict>\n");
-    fprintf(fp, "</dict>\n");
-    fprintf(fp, "</plist>\n");
-    fclose(fp);
-
-    fp = fopen("/var/mobile/Library/Preferences/com.michael.iokit.IOMobileGraphicsFamily.plist","a+");
-    fprintf(fp, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-    fprintf(fp, "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n");
-    fprintf(fp, "<plist version=\"1.0\">\n");
-    fprintf(fp, "<dict>\n");
-    fprintf(fp, "</dict>\n");
-    fprintf(fp, "</plist>\n");
-    fclose(fp);
+    [[NSDictionary dictionary] writeToFile:@"/var/mobile/Library/Preferences/com.apple.iokit.IOMobileGraphicsFamily.plist" atomically:NO];
+    [[NSDictionary dictionary] writeToFile:@"/var/mobile/Library/Preferences/com.michael.iokit.IOMobileGraphicsFamily.plist" atomically:NO];
 
     modifyPlist(@"/var/mobile/Library/Preferences/com.apple.iokit.IOMobileGraphicsFamily.plist", ^(id plist) {
         plist[@"canvas_height"] = [NSNumber numberWithInteger:[[NSString stringWithFormat:@"%s", height] integerValue]];
