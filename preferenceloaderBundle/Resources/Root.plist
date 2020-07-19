@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>items</key>
+	<array>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>label</key>
+			<string>Resolution Setter</string>
+			<key>footerText</key>
+			<string>Set a resolution</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSEditTextCell</string>
+			<key>defaults</key>
+			<string>com.michael.iokit.IOMobileGraphicsFamily</string>
+			<key>isNumeric</key>
+			<true/>
+			<key>key</key>
+			<string>canvas_height</string>
+			<key>label</key>
+			<string>Height</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSEditTextCell</string>
+			<key>defaults</key>
+			<string>com.michael.iokit.IOMobileGraphicsFamily</string>
+			<key>isNumeric</key>
+			<true/>
+			<key>key</key>
+			<string>canvas_width</string>
+			<key>label</key>
+			<string>Width</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSButtonCell</string>
+			<key>label</key>
+			<string>Set</string>
+			<key>action</key>
+			<string>setresolution</string>
+		</dict>
+	</array>
+	<key>title</key>
+	<string>Resolution Setter</string>
+</dict>
+</plist>

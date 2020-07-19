@@ -1,11 +1,11 @@
 Package: com.michael.resolutionsetter
-Version: 0.5.1
+Version: 0.6.0
 Section: Tweaks
 Name: Resolution Setter
 Author: halo_michael <yc992147156@me.com>
 Sponsor: halo_michael <yc992147156@me.com>
 Maintainer: halo_michael <yc992147156@me.com>
-Depends: firmware (>= 9.0), coreutils
+Depends: firmware (>= 9.0), preferenceloader
 Architecture: iphoneos-arm
-Description: Change your device resolution via Terminal!
+Description: Change your device resolution on Settings or via Terminal!
 Depiction: https://halo-michael.github.io/repo/info/resolutionsetter

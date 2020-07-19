@@ -1,3 +1,5 @@
+#import <Foundation/Foundation.h>
+
 void usage() {
     printf("Usage:\tres|resolution [height] [width] [OPTIONS...]\n");
     printf("\t-h\tPrint this help.\n");
