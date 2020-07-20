@@ -1,6 +1,6 @@
 export TARGET = iphone:clang:13.0:9.0
 export ARCHS = armv7 arm64 arm64e
-export VERSION = 0.6.2
+export VERSION = 0.6.3
 export DEBUG = no
 Package = com.michael.resolutionsetter
 CC = xcrun -sdk ${THEOS}/sdks/iPhoneOS13.0.sdk clang -arch armv7 -arch arm64 -arch arm64e -miphoneos-version-min=9.0
