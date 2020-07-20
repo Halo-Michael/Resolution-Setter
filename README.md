@@ -1,0 +1,1 @@
+Change your device resolution on Settings or via Terminal! (For iOS/iPadOS)
