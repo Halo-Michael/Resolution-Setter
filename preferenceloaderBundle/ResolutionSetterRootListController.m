@@ -1,6 +1,19 @@
 #import <Preferences/PSListController.h>
 #import <Preferences/PSSpecifier.h>
 
+UIAlertController *alert(NSString *alertTitle, NSString *alertMessage, NSString *actionTitle) {
+    UIAlertController *theAlert = [UIAlertController
+                                alertControllerWithTitle:alertTitle
+                                message:alertMessage
+                                preferredStyle:UIAlertControllerStyleAlert];
+    UIAlertAction *defaultAction = [UIAlertAction
+                                    actionWithTitle:actionTitle
+                                    style:UIAlertActionStyleDefault
+                                    handler:^(UIAlertAction * action) {}];
+    [theAlert addAction:defaultAction];
+    return theAlert;
+}
+
 bool heightError = false, widthError = false, hasSetHeight = false, hasSetWidth = false;
 
 @interface ResolutionSetterRootListController : PSListController
@@ -21,23 +34,11 @@ bool heightError = false, widthError = false, hasSetHeight = false, hasSetWidth 
     if ([[specifier propertyForKey:@"key"] isEqualToString:@"canvas_height"]) {
         if ([value intValue] < 100) {
             heightError = true;
-            UIAlertController *error = [UIAlertController alertControllerWithTitle:@"Error!"
-                                          message:[NSString stringWithFormat:@"Wrong input:\"%@\", height is too small!", value]
-                                          preferredStyle:UIAlertControllerStyleAlert];
-            UIAlertAction* defaultAction = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault
-               handler:^(UIAlertAction * action) {}];
-            [error addAction:defaultAction];
-            [self presentViewController:error animated:YES completion:nil];
+            [self presentViewController:alert(@"Error!", [NSString stringWithFormat:@"Wrong input \"%@\":\nHeight is too small!", value], @"OK") animated:YES completion:nil];
             return;
         } else if ([value intValue] > 9999) {
             heightError = true;
-            UIAlertController *error = [UIAlertController alertControllerWithTitle:@"Error!"
-                                          message:[NSString stringWithFormat:@"Wrong input:\"%@\", height is too large!", value]
-                                          preferredStyle:UIAlertControllerStyleAlert];
-            UIAlertAction* defaultAction = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault
-               handler:^(UIAlertAction * action) {}];
-            [error addAction:defaultAction];
-            [self presentViewController:error animated:YES completion:nil];
+            [self presentViewController:alert(@"Error!", [NSString stringWithFormat:@"Wrong input \"%@\":\nHeight is too large!", value], @"OK") animated:YES completion:nil];
             return;
         } else {
             heightError = false;
@@ -47,23 +48,11 @@ bool heightError = false, widthError = false, hasSetHeight = false, hasSetWidth 
     if ([[specifier propertyForKey:@"key"] isEqualToString:@"canvas_width"]) {
         if ([value intValue] < 100) {
             widthError = true;
-            UIAlertController *error = [UIAlertController alertControllerWithTitle:@"Error!"
-                                          message:[NSString stringWithFormat:@"Wrong input:\"%@\", width is too small!", value]
-                                          preferredStyle:UIAlertControllerStyleAlert];
-            UIAlertAction* defaultAction = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault
-               handler:^(UIAlertAction * action) {}];
-            [error addAction:defaultAction];
-            [self presentViewController:error animated:YES completion:nil];
+            [self presentViewController:alert(@"Error!", [NSString stringWithFormat:@"Wrong input \"%@\":\nWidth is too small!", value], @"OK") animated:YES completion:nil];
             return;
         } else if ([value intValue] > 9999) {
             widthError = true;
-            UIAlertController *error = [UIAlertController alertControllerWithTitle:@"Error!"
-                                          message:[NSString stringWithFormat:@"Wrong input:\"%@\", width is too large!", value]
-                                          preferredStyle:UIAlertControllerStyleAlert];
-            UIAlertAction* defaultAction = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault
-               handler:^(UIAlertAction * action) {}];
-            [error addAction:defaultAction];
-            [self presentViewController:error animated:YES completion:nil];
+            [self presentViewController:alert(@"Error!", [NSString stringWithFormat:@"Wrong input \"%@\":\nWidth is too large!", value], @"OK") animated:YES completion:nil];
             return;
         } else {
             widthError = false;
@@ -74,11 +63,11 @@ bool heightError = false, widthError = false, hasSetHeight = false, hasSetWidth 
 }
 
 - (id)readPreferenceValue:(PSSpecifier*)specifier {
-    if ([[specifier propertyForKey:@"key"] isEqualToString:@"canvas_height"]) {
-        return [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/com.apple.iokit.IOMobileGraphicsFamily.plist"][@"canvas_height"];
-    }
-    if ([[specifier propertyForKey:@"key"] isEqualToString:@"canvas_width"]) {
-        return [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/com.apple.iokit.IOMobileGraphicsFamily.plist"][@"canvas_width"];
+    if ([[specifier propertyForKey:@"key"] isEqualToString:@"canvas_height"] || [[specifier propertyForKey:@"key"] isEqualToString:@"canvas_width"]) {
+        CFStringRef appID = CFSTR("com.apple.iokit.IOMobileGraphicsFamily");
+        CFArrayRef keyList = CFPreferencesCopyKeyList(appID, CFSTR("mobile"), kCFPreferencesAnyHost);
+        NSDictionary *settings = (NSDictionary *)CFBridgingRelease(CFPreferencesCopyMultiple(keyList, appID, CFSTR("mobile"), kCFPreferencesAnyHost));
+        return settings[[specifier propertyForKey:@"key"]];
     }
     return [super readPreferenceValue:specifier];
 }
