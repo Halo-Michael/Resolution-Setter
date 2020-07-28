@@ -156,7 +156,7 @@ int main(int argc, char **argv) {
     CFPreferencesSetValue(CFSTR("canvas_height"), newInt(atoi(height)), CFSTR("com.michael.iokit.IOMobileGraphicsFamily"), CFSTR("mobile"), kCFPreferencesAnyHost);
     CFPreferencesSetValue(CFSTR("canvas_width"), newInt(atoi(width)), CFSTR("com.michael.iokit.IOMobileGraphicsFamily"), CFSTR("mobile"), kCFPreferencesAnyHost);
 
-    int ret = 1, status;
+    int ret = 3, status;
     if ([args containsObject:@"-w"]) {
         printf("Successfully set the resolution to %sx%s, you should manual respring your drvice.\n", height, width);
         ret = 0;
