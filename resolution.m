@@ -27,44 +27,22 @@ bool do_check(const char *num) {
     return true;
 }
 
-bool modifyPlist(NSString *filename, void (^function)(id)) {
-    NSData *data = [NSData dataWithContentsOfFile:filename];
-    if (data == nil) {
-        return false;
-    }
-    NSPropertyListFormat format = 0;
-    id plist = [NSPropertyListSerialization propertyListWithData:data options:NSPropertyListMutableContainersAndLeaves format:&format error:nil];
-    if (plist == nil) {
-        return false;
-    }
-    if (function) {
-        function(plist);
-    }
-    NSData *newData = [NSPropertyListSerialization dataWithPropertyList:plist format:format options:0 error:nil];
-    if (newData == nil) {
-        return false;
-    }
-    if (![data isEqual:newData]) {
-        if (![newData writeToFile:filename atomically:YES]) {
-            return false;
-        }
-    }
-    return true;
+CFNumberRef newInt(int value) {
+    return CFNumberCreate(NULL, kCFNumberIntType, &value);
 }
 
 int main(int argc, char **argv) {
-    if (getuid() != 0) {
-        setuid(0);
-    }
-
-    if (getuid() != 0) {
-        printf("Can't set uid as 0.\n");
-        return 1;
-    }
-
     if (argc == 2 || argc > 5) {
         usage();
         return 1;
+    }
+
+    NSMutableArray *args = [[[NSProcessInfo processInfo] arguments] mutableCopy];
+    [args removeObjectAtIndex:0];
+    
+    if ([args containsObject:@"-h"]) {
+        usage();
+        return 0;
     }
 
     if (argc > 2) {
@@ -73,10 +51,10 @@ int main(int argc, char **argv) {
             return 1;
         } else if (strlen(argv[1]) > 4 || strlen(argv[2]) > 4) {
             printf("The resolution is too high, you may have no idea what you are doing, now exit.\n");
-            return 1;
+            return 2;
         } else if (strlen(argv[1]) < 3 || strlen(argv[2]) < 3) {
             printf("The resolution is too low, you may have no idea what you are doing, now exit.\n");
-            return 1;
+            return 2;
         }
     }
 
@@ -87,127 +65,106 @@ int main(int argc, char **argv) {
         width = argv[2];
     }
 
-    for (int i = 0; i < argc; i++) {
+    if (argc == 1 || ![args containsObject:@"-y"]) {
+        char confirm;
         if (argc > 2) {
-            if (strcmp(argv[i], "-y") == 0) {
-                break;
+            printf("Are you sure you want to set the resolution to %sx%s?(y/n)", height, width);
+            confirm = getchar();
+            while (getchar() != '\n') {
+                getchar();
             }
         }
-        if (argc == 1 || i == argc - 1) {
-            char confirm;
-            if (argc > 2) {
+        if (argc == 1 || confirm == 'n' || confirm == 'N') {
+            while (confirm != 'y' && confirm != 'Y') {
+                int strLen = 6;
+                char ch = '\0';
+                char *tmp_height = (char*)malloc(sizeof(char*) * strLen);
+                int count = 0;
+                printf("Please choice a height to set:");
+                while (ch != '\n') {
+                    ch = getchar();
+                    count++;
+                    if (count >= strLen)
+                    {
+                        tmp_height = (char*)realloc(tmp_height, sizeof(char*) * (++strLen));
+                    }
+                    tmp_height[count - 1] = ch;
+                }
+                tmp_height[count - 1] = '\0';
+                
+                if (do_check(tmp_height) == false) {
+                    printf("Invalid parameters, you may have no idea what you are doing, now exit.\n");
+                    return 1;
+                } else if (count > 5) {
+                    printf("Height is too high, you may have no idea what you are doing, now exit.\n");
+                    return 2;
+                } else if (count < 4) {
+                    printf("Height is too low, you may have no idea what you are doing, now exit.\n");
+                    return 2;
+                }
+                height = tmp_height;
+
+                strLen = 6;
+                ch = '\0';
+                char *tmp_width = (char*)malloc(sizeof(char*) * strLen);
+                count = 0;
+                printf("Please choice a width to set:");
+                while (ch != '\n') {
+                    ch = getchar();
+                    count++;
+                    if (count >= strLen)
+                    {
+                        tmp_width = (char*)realloc(tmp_width, sizeof(char*) * (++strLen));
+                    }
+                    tmp_width[count - 1] = ch;
+                }
+                tmp_width[count - 1] = '\0';
+
+                if (do_check(tmp_width) == false) {
+                    printf("Invalid parameters, you may have no idea what you are doing, now exit.\n");
+                    return 1;
+                } else if (count > 5) {
+                    printf("Width is too high, you may have no idea what you are doing, now exit.\n");
+                    return 2;
+                } else if (count < 4) {
+                    printf("Width is too low, you may have no idea what you are doing, now exit.\n");
+                    return 2;
+                }
+                width = tmp_width;
+
                 printf("Are you sure you want to set the resolution to %sx%s?(y/n)", height, width);
                 confirm = getchar();
                 while (getchar() != '\n') {
                     getchar();
                 }
-            }
-            if (argc == 1 || confirm == 'n' || confirm == 'N') {
-                while (confirm != 'y' && confirm != 'Y') {
-                    int strLen = 6;
-                    char ch = '\0';
-                    char *tmp_height = (char*)malloc(sizeof(char*) * strLen);
-                    int count = 0;
-                    printf("Please choice a height to set:");
-                    while (ch != '\n') {
-                        ch = getchar();
-                        count++;
-                        if (count >= strLen)
-                        {
-                            tmp_height = (char*)realloc(tmp_height, sizeof(char*) * (++strLen));
-                        }
-                        tmp_height[count - 1] = ch;
-                    }
-                    tmp_height[count - 1] = '\0';
-                    
-                    if (do_check(tmp_height) == false) {
-                        printf("Invalid parameters, you may have no idea what you are doing, now exit.\n");
-                        return 1;
-                    } else if (count > 5) {
-                        printf("Height is too high, you may have no idea what you are doing, now exit.\n");
-                        return 1;
-                    } else if (count < 4) {
-                        printf("Height is too low, you may have no idea what you are doing, now exit.\n");
-                        return 1;
-                    }
-                    height = tmp_height;
-
-                    strLen = 6;
-                    ch = '\0';
-                    char *tmp_width = (char*)malloc(sizeof(char*) * strLen);
-                    count = 0;
-                    printf("Please choice a width to set:");
-                    while (ch != '\n') {
-                        ch = getchar();
-                        count++;
-                        if (count >= strLen)
-                        {
-                            tmp_width = (char*)realloc(tmp_width, sizeof(char*) * (++strLen));
-                        }
-                        tmp_width[count - 1] = ch;
-                    }
-                    tmp_width[count - 1] = '\0';
-
-                    if (do_check(tmp_width) == false) {
-                        printf("Invalid parameters, you may have no idea what you are doing, now exit.\n");
-                        return 1;
-                    } else if (count > 5) {
-                        printf("Width is too high, you may have no idea what you are doing, now exit.\n");
-                        return 1;
-                    } else if (count < 4) {
-                        printf("Width is too low, you may have no idea what you are doing, now exit.\n");
-                        return 1;
-                    }
-                    width = tmp_width;
-
-                    printf("Are you sure you want to set the resolution to %sx%s?(y/n)", height, width);
-                    confirm = getchar();
-                    while (getchar() != '\n') {
-                        getchar();
-                    }
-                    if (confirm != 'y' && confirm != 'Y' && confirm != 'n' && confirm != 'N') {
-                        printf("Invalid parameters, you may have no idea what you are doing, now exit.\n");
-                        return 1;
-                    }
+                if (confirm != 'y' && confirm != 'Y' && confirm != 'n' && confirm != 'N') {
+                    printf("Invalid parameters, you may have no idea what you are doing, now exit.\n");
+                    return 1;
                 }
-            } else if (confirm != 'y' && confirm != 'Y') {
-                printf("Invalid parameters, you may have no idea what you are doing, now exit.\n");
-                return 1;
             }
+        } else if (confirm != 'y' && confirm != 'Y') {
+            printf("Invalid parameters, you may have no idea what you are doing, now exit.\n");
+            return 1;
         }
     }
 
     remove("/var/mobile/Library/Preferences/com.apple.iokit.IOMobileGraphicsFamily.plist");
     remove("/var/mobile/Library/Preferences/com.michael.iokit.IOMobileGraphicsFamily.plist");
 
-    [[NSDictionary dictionary] writeToFile:@"/var/mobile/Library/Preferences/com.apple.iokit.IOMobileGraphicsFamily.plist" atomically:NO];
-    [[NSDictionary dictionary] writeToFile:@"/var/mobile/Library/Preferences/com.michael.iokit.IOMobileGraphicsFamily.plist" atomically:NO];
+    CFPreferencesSetValue(CFSTR("canvas_height"), newInt(atoi(height)), CFSTR("com.apple.iokit.IOMobileGraphicsFamily"), CFSTR("mobile"), kCFPreferencesAnyHost);
+    CFPreferencesSetValue(CFSTR("canvas_width"), newInt(atoi(width)), CFSTR("com.apple.iokit.IOMobileGraphicsFamily"), CFSTR("mobile"), kCFPreferencesAnyHost);
+    CFPreferencesSetValue(CFSTR("canvas_height"), newInt(atoi(height)), CFSTR("com.michael.iokit.IOMobileGraphicsFamily"), CFSTR("mobile"), kCFPreferencesAnyHost);
+    CFPreferencesSetValue(CFSTR("canvas_width"), newInt(atoi(width)), CFSTR("com.michael.iokit.IOMobileGraphicsFamily"), CFSTR("mobile"), kCFPreferencesAnyHost);
 
-    modifyPlist(@"/var/mobile/Library/Preferences/com.apple.iokit.IOMobileGraphicsFamily.plist", ^(id plist) {
-        plist[@"canvas_height"] = [NSNumber numberWithInteger:[[NSString stringWithFormat:@"%s", height] integerValue]];
-    });
-    modifyPlist(@"/var/mobile/Library/Preferences/com.michael.iokit.IOMobileGraphicsFamily.plist", ^(id plist) {
-        plist[@"canvas_height"] = [NSNumber numberWithInteger:[[NSString stringWithFormat:@"%s", height] integerValue]];
-    });
-    modifyPlist(@"/var/mobile/Library/Preferences/com.apple.iokit.IOMobileGraphicsFamily.plist", ^(id plist) {
-        plist[@"canvas_width"] = [NSNumber numberWithInteger:[[NSString stringWithFormat:@"%s", width] integerValue]];
-    });
-    modifyPlist(@"/var/mobile/Library/Preferences/com.michael.iokit.IOMobileGraphicsFamily.plist", ^(id plist) {
-        plist[@"canvas_width"] = [NSNumber numberWithInteger:[[NSString stringWithFormat:@"%s", width] integerValue]];
-    });
-
-    NSString *command = @"sleep 1 && killall -9 cfprefsd && killall -9 backboardd";
-    NSString *prints = [NSString stringWithFormat:@"Successfully set the resolution to %sx%s, the device will be respring.\n", height, width];
-
-    for (int i = 1; i < argc; i++) {
-        if (strcmp(argv[i], "-w") == 0) {
-            command = @"killall -9 cfprefsd";
-            prints = [NSString stringWithFormat:@"Successfully set the resolution to %sx%s, you should manual respring your drvice.\n", height, width];
-            break;
-        }
+    int ret = 1, status;
+    if ([args containsObject:@"-w"]) {
+        printf("Successfully set the resolution to %sx%s, you should manual respring your drvice.\n", height, width);
+        ret = 0;
+    } else {
+        printf("Successfully set the resolution to %sx%s, the device will be respring.\n", height, width);
+        sleep(1);
+        status = system("killall -9 backboardd");
+        ret = WEXITSTATUS(status);
     }
-
-    printf("%s", [prints UTF8String]);
-    int status = system([command UTF8String]);
-    return WEXITSTATUS(status);
+    return ret;
 }

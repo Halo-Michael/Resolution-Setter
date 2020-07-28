@@ -34,11 +34,11 @@ bool heightError = false, widthError = false, hasSetHeight = false, hasSetWidth 
     if ([[specifier propertyForKey:@"key"] isEqualToString:@"canvas_height"]) {
         if ([value intValue] < 100) {
             heightError = true;
-            [self presentViewController:alert(@"Error!", [NSString stringWithFormat:@"Wrong input \"%@\":\nHeight is too small!", value], @"OK") animated:YES completion:nil];
+            [self presentViewController:alert(@"Error!", [NSString stringWithFormat:@"Wrong input \"%@\":\nHeight is too low!", value], @"OK") animated:YES completion:nil];
             return;
         } else if ([value intValue] > 9999) {
             heightError = true;
-            [self presentViewController:alert(@"Error!", [NSString stringWithFormat:@"Wrong input \"%@\":\nHeight is too large!", value], @"OK") animated:YES completion:nil];
+            [self presentViewController:alert(@"Error!", [NSString stringWithFormat:@"Wrong input \"%@\":\nHeight is too high!", value], @"OK") animated:YES completion:nil];
             return;
         } else {
             heightError = false;
@@ -48,11 +48,11 @@ bool heightError = false, widthError = false, hasSetHeight = false, hasSetWidth 
     if ([[specifier propertyForKey:@"key"] isEqualToString:@"canvas_width"]) {
         if ([value intValue] < 100) {
             widthError = true;
-            [self presentViewController:alert(@"Error!", [NSString stringWithFormat:@"Wrong input \"%@\":\nWidth is too small!", value], @"OK") animated:YES completion:nil];
+            [self presentViewController:alert(@"Error!", [NSString stringWithFormat:@"Wrong input \"%@\":\nWidth is too low!", value], @"OK") animated:YES completion:nil];
             return;
         } else if ([value intValue] > 9999) {
             widthError = true;
-            [self presentViewController:alert(@"Error!", [NSString stringWithFormat:@"Wrong input \"%@\":\nWidth is too large!", value], @"OK") animated:YES completion:nil];
+            [self presentViewController:alert(@"Error!", [NSString stringWithFormat:@"Wrong input \"%@\":\nWidth is too high!", value], @"OK") animated:YES completion:nil];
             return;
         } else {
             widthError = false;

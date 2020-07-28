@@ -1,18 +1,17 @@
 export TARGET = iphone:clang:13.0:9.0
 export ARCHS = armv7 arm64 arm64e
-export VERSION = 0.6.3
+export VERSION = 0.7.0
 export DEBUG = no
 Package = com.michael.resolutionsetter
-CC = xcrun -sdk ${THEOS}/sdks/iPhoneOS13.0.sdk clang -arch armv7 -arch arm64 -arch arm64e -miphoneos-version-min=9.0
+CC = xcrun -sdk ${THEOS}/sdks/iPhoneOS13.0.sdk clang -arch armv7 -arch arm64 -arch arm64e -fobjc-arc -miphoneos-version-min=9.0
 LDID = ldid
 
 .PHONY: all clean
 
-all: clean postinst resolution preferenceloaderBundle
+all: clean resolution preferenceloaderBundle
 	mkdir $(Package)_$(VERSION)_iphoneos-arm
 	mkdir $(Package)_$(VERSION)_iphoneos-arm/DEBIAN
 	cp control $(Package)_$(VERSION)_iphoneos-arm/DEBIAN
-	mv postinst $(Package)_$(VERSION)_iphoneos-arm/DEBIAN
 	mkdir $(Package)_$(VERSION)_iphoneos-arm/usr
 	mkdir $(Package)_$(VERSION)_iphoneos-arm/usr/bin
 	mv resolution $(Package)_$(VERSION)_iphoneos-arm/usr/bin
@@ -25,13 +24,8 @@ all: clean postinst resolution preferenceloaderBundle
 	mv preferenceloaderBundle/.theos/obj/ResolutionSetter.bundle $(Package)_$(VERSION)_iphoneos-arm/Library/PreferenceBundles
 	dpkg -b $(Package)_$(VERSION)_iphoneos-arm
 
-postinst: clean
-	$(CC) postinst.c -o postinst
-	strip postinst
-	$(LDID) -Sentitlements.xml postinst
-
 resolution: clean
-	$(CC) -fobjc-arc resolution.m -o resolution
+	$(CC) resolution.m -o resolution
 	strip resolution
 	$(LDID) -Sentitlements.xml resolution
 
@@ -40,4 +34,4 @@ preferenceloaderBundle: clean
 
 clean:
 	rm -rf com.michael.resolutionsetter_* preferenceloaderBundle/.theos
-	rm -f postinst resolution
+	rm -f resolution
