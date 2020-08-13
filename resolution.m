@@ -32,7 +32,7 @@ CFNumberRef newInt(int value) {
     return CFNumberCreate(NULL, kCFNumberIntType, &value);
 }
 
-int main(const int argc, const char *argv[]) {
+int main(int argc, char *argv[]) {
     if (argc == 2 || argc > 5) {
         usage();
         return 1;
