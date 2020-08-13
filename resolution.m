@@ -1,4 +1,5 @@
 #import <Foundation/Foundation.h>
+#include <removefile.h>
 
 void usage() {
     printf("Usage:\tres|resolution [height] [width] [OPTIONS...]\n");
@@ -31,15 +32,17 @@ CFNumberRef newInt(int value) {
     return CFNumberCreate(NULL, kCFNumberIntType, &value);
 }
 
-int main(int argc, char **argv) {
+int main(const int argc, const char *argv[]) {
     if (argc == 2 || argc > 5) {
         usage();
         return 1;
     }
 
-    NSMutableArray *args = [[[NSProcessInfo processInfo] arguments] mutableCopy];
-    [args removeObjectAtIndex:0];
-    
+    NSMutableArray *args = [[NSMutableArray alloc] init];
+    for (int i = 1; i < argc; i++) {
+        [args addObject:[[NSString alloc] initWithUTF8String:argv[i]]];
+    }
+
     if ([args containsObject:@"-h"]) {
         usage();
         return 0;
@@ -148,8 +151,8 @@ int main(int argc, char **argv) {
         }
     }
 
-    remove("/var/mobile/Library/Preferences/com.apple.iokit.IOMobileGraphicsFamily.plist");
-    remove("/var/mobile/Library/Preferences/com.michael.iokit.IOMobileGraphicsFamily.plist");
+    removefile("/var/mobile/Library/Preferences/com.apple.iokit.IOMobileGraphicsFamily.plist", NULL, REMOVEFILE_RECURSIVE);
+    removefile("/var/mobile/Library/Preferences/com.michael.iokit.IOMobileGraphicsFamily.plist", NULL, REMOVEFILE_RECURSIVE);
 
     CFPreferencesSetValue(CFSTR("canvas_height"), newInt(atoi(height)), CFSTR("com.apple.iokit.IOMobileGraphicsFamily"), CFSTR("mobile"), kCFPreferencesAnyHost);
     CFPreferencesSetValue(CFSTR("canvas_width"), newInt(atoi(width)), CFSTR("com.apple.iokit.IOMobileGraphicsFamily"), CFSTR("mobile"), kCFPreferencesAnyHost);
