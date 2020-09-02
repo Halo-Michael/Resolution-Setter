@@ -8,7 +8,7 @@ void usage() {
     printf("\t-y\tPass the confirm message.\n");
 }
 
-bool do_check(const char *num) {
+bool is_number(const char *num) {
     if (strcmp(num, "0") == 0) {
         return true;
     }
@@ -49,7 +49,7 @@ int main(int argc, char *argv[]) {
     }
 
     if (argc > 2) {
-        if (do_check(argv[1]) == false || do_check(argv[2]) == false) {
+        if (!is_number(argv[1]) || !is_number(argv[2])) {
             printf("Invalid parameters, you may have no idea what you are doing, now exit.\n");
             return 1;
         } else if (strlen(argv[1]) > 4 || strlen(argv[2]) > 4) {
@@ -79,57 +79,47 @@ int main(int argc, char *argv[]) {
         }
         if (argc == 1 || confirm == 'n' || confirm == 'N') {
             while (confirm != 'y' && confirm != 'Y') {
-                int strLen = 6;
-                char ch = '\0';
-                char *tmp_height = (char*)malloc(sizeof(char*) * strLen);
-                int count = 0;
+                int strLen = 1;
+                char *tmp_height = (char *)malloc(sizeof(char) * strLen);
                 printf("Please choice a height to set:");
+                char ch = getchar();
                 while (ch != '\n') {
+                    tmp_height = (char *)realloc(tmp_height, sizeof(char) * (++strLen));
+                    tmp_height[strLen - 2] = ch;
                     ch = getchar();
-                    count++;
-                    if (count >= strLen)
-                    {
-                        tmp_height = (char*)realloc(tmp_height, sizeof(char*) * (++strLen));
-                    }
-                    tmp_height[count - 1] = ch;
                 }
-                tmp_height[count - 1] = '\0';
-                
-                if (do_check(tmp_height) == false) {
+                tmp_height[strLen - 1] = '\0';
+
+                if (!is_number(tmp_height)) {
                     printf("Invalid parameters, you may have no idea what you are doing, now exit.\n");
                     return 1;
-                } else if (count > 5) {
+                } else if (strLen > 5) {
                     printf("Height is too high, you may have no idea what you are doing, now exit.\n");
                     return 2;
-                } else if (count < 4) {
+                } else if (strLen < 4) {
                     printf("Height is too low, you may have no idea what you are doing, now exit.\n");
                     return 2;
                 }
                 height = tmp_height;
 
-                strLen = 6;
-                ch = '\0';
-                char *tmp_width = (char*)malloc(sizeof(char*) * strLen);
-                count = 0;
+                strLen = 1;
+                char *tmp_width = (char *)malloc(sizeof(char) * strLen);
                 printf("Please choice a width to set:");
+                ch = getchar();
                 while (ch != '\n') {
+                    tmp_width = (char *)realloc(tmp_width, sizeof(char) * (++strLen));
+                    tmp_width[strLen - 2] = ch;
                     ch = getchar();
-                    count++;
-                    if (count >= strLen)
-                    {
-                        tmp_width = (char*)realloc(tmp_width, sizeof(char*) * (++strLen));
-                    }
-                    tmp_width[count - 1] = ch;
                 }
-                tmp_width[count - 1] = '\0';
+                tmp_width[strLen - 1] = '\0';
 
-                if (do_check(tmp_width) == false) {
+                if (!is_number(tmp_width)) {
                     printf("Invalid parameters, you may have no idea what you are doing, now exit.\n");
                     return 1;
-                } else if (count > 5) {
+                } else if (strLen > 5) {
                     printf("Width is too high, you may have no idea what you are doing, now exit.\n");
                     return 2;
-                } else if (count < 4) {
+                } else if (strLen < 4) {
                     printf("Width is too low, you may have no idea what you are doing, now exit.\n");
                     return 2;
                 }
@@ -159,7 +149,7 @@ int main(int argc, char *argv[]) {
     CFPreferencesSetValue(CFSTR("canvas_height"), newInt(atoi(height)), CFSTR("com.michael.iokit.IOMobileGraphicsFamily"), CFSTR("mobile"), kCFPreferencesAnyHost);
     CFPreferencesSetValue(CFSTR("canvas_width"), newInt(atoi(width)), CFSTR("com.michael.iokit.IOMobileGraphicsFamily"), CFSTR("mobile"), kCFPreferencesAnyHost);
 
-    int ret = 3, status;
+    int ret, status;
     if ([args containsObject:@"-w"]) {
         printf("Successfully set the resolution to %sx%s, you should manual respring your drvice.\n", height, width);
         ret = 0;

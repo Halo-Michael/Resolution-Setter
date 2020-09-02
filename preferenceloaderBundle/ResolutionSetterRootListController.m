@@ -80,12 +80,12 @@ bool heightError = false, widthError = false, hasSetHeight = false, hasSetWidth 
         NSDictionary *settings = (NSDictionary *)CFBridgingRelease(CFPreferencesCopyMultiple(keyList, appID, CFSTR("mobile"), kCFPreferencesAnyHost));
         id canvas_height = nil, canvas_width = nil;
         if (!hasSetHeight) {
-            canvas_height = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/com.apple.iokit.IOMobileGraphicsFamily.plist"][@"canvas_height"];
+            canvas_height = [NSDictionary dictionaryWithContentsOfFile:@"/private/var/mobile/Library/Preferences/com.apple.iokit.IOMobileGraphicsFamily.plist"][@"canvas_height"];
         } else {
             canvas_height = settings[@"canvas_height"];
         }
         if (!hasSetWidth) {
-            canvas_width = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/com.apple.iokit.IOMobileGraphicsFamily.plist"][@"canvas_width"];
+            canvas_width = [NSDictionary dictionaryWithContentsOfFile:@"/private/var/mobile/Library/Preferences/com.apple.iokit.IOMobileGraphicsFamily.plist"][@"canvas_width"];
         } else {
             canvas_width = settings[@"canvas_width"];
         }
