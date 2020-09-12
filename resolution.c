@@ -1,4 +1,4 @@
-#import <Foundation/Foundation.h>
+#include <CoreFoundation/CoreFoundation.h>
 #include <removefile.h>
 
 void usage() {
@@ -28,6 +28,15 @@ bool is_number(const char *num) {
     return true;
 }
 
+bool isContains(int argc, char *argv[], const char *theChar) {
+    for (int i = 0; i < argc; i++) {
+        if (strcmp(argv[i], theChar) == 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
 CFNumberRef newInt(int value) {
     return CFNumberCreate(NULL, kCFNumberIntType, &value);
 }
@@ -38,12 +47,7 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    NSMutableArray *args = [[NSMutableArray alloc] init];
-    for (int i = 1; i < argc; i++) {
-        [args addObject:[[NSString alloc] initWithUTF8String:argv[i]]];
-    }
-
-    if ([args containsObject:@"-h"]) {
+    if (isContains(argc, argv, "-h")) {
         usage();
         return 0;
     }
@@ -68,7 +72,7 @@ int main(int argc, char *argv[]) {
         width = argv[2];
     }
 
-    if (argc == 1 || ![args containsObject:@"-y"]) {
+    if (argc == 1 || !isContains(argc, argv, "-y")) {
         char confirm;
         if (argc > 2) {
             printf("Are you sure you want to set the resolution to %sx%s?(y/n)", height, width);
@@ -150,7 +154,7 @@ int main(int argc, char *argv[]) {
     CFPreferencesSetValue(CFSTR("canvas_width"), newInt(atoi(width)), CFSTR("com.michael.iokit.IOMobileGraphicsFamily"), CFSTR("mobile"), kCFPreferencesAnyHost);
 
     int ret, status;
-    if ([args containsObject:@"-w"]) {
+    if (isContains(argc, argv, "-w")) {
         printf("Successfully set the resolution to %sx%s, you should manual respring your drvice.\n", height, width);
         ret = 0;
     } else {

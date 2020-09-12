@@ -26,7 +26,6 @@ bool heightError = false, widthError = false, hasSetHeight = false, hasSetWidth 
 	if (!_specifiers) {
 		_specifiers = [self loadSpecifiersFromPlistName:@"Root" target:self];
 	}
-
 	return _specifiers;
 }
 
@@ -64,10 +63,7 @@ bool heightError = false, widthError = false, hasSetHeight = false, hasSetWidth 
 
 - (id)readPreferenceValue:(PSSpecifier*)specifier {
     if ([[specifier propertyForKey:@"key"] isEqualToString:@"canvas_height"] || [[specifier propertyForKey:@"key"] isEqualToString:@"canvas_width"]) {
-        CFStringRef appID = CFSTR("com.apple.iokit.IOMobileGraphicsFamily");
-        CFArrayRef keyList = CFPreferencesCopyKeyList(appID, CFSTR("mobile"), kCFPreferencesAnyHost);
-        NSDictionary *settings = (NSDictionary *)CFBridgingRelease(CFPreferencesCopyMultiple(keyList, appID, CFSTR("mobile"), kCFPreferencesAnyHost));
-        return settings[[specifier propertyForKey:@"key"]];
+        return (id)CFBridgingRelease(CFPreferencesCopyValue((__bridge CFStringRef)[specifier propertyForKey:@"key"], CFSTR("com.apple.iokit.IOMobileGraphicsFamily"), CFSTR("mobile"), kCFPreferencesAnyHost));
     }
     return [super readPreferenceValue:specifier];
 }
@@ -75,22 +71,25 @@ bool heightError = false, widthError = false, hasSetHeight = false, hasSetWidth 
 -(void)setresolution {
     [self.view endEditing:YES];
     if (!heightError && !widthError && (hasSetHeight || hasSetWidth)) {
-        CFStringRef appID = CFSTR("com.michael.iokit.IOMobileGraphicsFamily");
-        CFArrayRef keyList = CFPreferencesCopyKeyList(appID, CFSTR("mobile"), kCFPreferencesAnyHost);
-        NSDictionary *settings = (NSDictionary *)CFBridgingRelease(CFPreferencesCopyMultiple(keyList, appID, CFSTR("mobile"), kCFPreferencesAnyHost));
-        id canvas_height = nil, canvas_width = nil;
+        CFTypeRef canvas_height = NULL, canvas_width = NULL;
         if (!hasSetHeight) {
-            canvas_height = [NSDictionary dictionaryWithContentsOfFile:@"/private/var/mobile/Library/Preferences/com.apple.iokit.IOMobileGraphicsFamily.plist"][@"canvas_height"];
+            canvas_height = CFPreferencesCopyValue(CFSTR("canvas_height"), CFSTR("com.michael.iokit.IOMobileGraphicsFamily"), CFSTR("mobile"), kCFPreferencesAnyHost);
         } else {
-            canvas_height = settings[@"canvas_height"];
+            canvas_height = CFPreferencesCopyValue(CFSTR("canvas_height"), CFSTR("com.michael.iokit.IOMobileGraphicsFamily"), CFSTR("mobile"), kCFPreferencesAnyHost);
         }
         if (!hasSetWidth) {
-            canvas_width = [NSDictionary dictionaryWithContentsOfFile:@"/private/var/mobile/Library/Preferences/com.apple.iokit.IOMobileGraphicsFamily.plist"][@"canvas_width"];
+            canvas_width = CFPreferencesCopyValue(CFSTR("canvas_width"), CFSTR("com.michael.iokit.IOMobileGraphicsFamily"), CFSTR("mobile"), kCFPreferencesAnyHost);
         } else {
-            canvas_width = settings[@"canvas_width"];
+            canvas_width = CFPreferencesCopyValue(CFSTR("canvas_width"), CFSTR("com.michael.iokit.IOMobileGraphicsFamily"), CFSTR("mobile"), kCFPreferencesAnyHost);
         }
-        if (canvas_height != nil && canvas_width != nil) {
+        if (canvas_height != NULL && canvas_width != NULL) {
             system([[NSString stringWithFormat:@"resolution %@ %@ -y", canvas_height, canvas_width] UTF8String]);
+        }
+        if (canvas_height != NULL) {
+            CFRelease(canvas_height);
+        }
+        if (canvas_width != NULL) {
+            CFRelease(canvas_width);
         }
     }
 }

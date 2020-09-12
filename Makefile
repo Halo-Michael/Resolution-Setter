@@ -1,9 +1,9 @@
 export TARGET = iphone:clang:13.0:9.0
 export ARCHS = armv7 arm64 arm64e
-export VERSION = 0.7.2
+export VERSION = 0.7.3
 export DEBUG = no
 Package = com.michael.resolutionsetter
-CC = xcrun -sdk ${THEOS}/sdks/iPhoneOS13.0.sdk clang -arch armv7 -arch arm64 -arch arm64e -fobjc-arc -miphoneos-version-min=9.0
+CC = xcrun -sdk ${THEOS}/sdks/iPhoneOS13.0.sdk clang -arch armv7 -arch arm64 -arch arm64e -miphoneos-version-min=9.0 -framework CoreFoundation
 LDID = ldid
 
 .PHONY: all clean
@@ -25,7 +25,7 @@ all: clean resolution preferenceloaderBundle
 	dpkg -b $(Package)_$(VERSION)_iphoneos-arm
 
 resolution: clean
-	$(CC) resolution.m -o resolution
+	$(CC) resolution.c -o resolution
 	strip resolution
 	$(LDID) -Sentitlements.xml resolution
 
