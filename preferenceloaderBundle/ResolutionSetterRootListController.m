@@ -73,12 +73,12 @@ bool heightError = false, widthError = false, hasSetHeight = false, hasSetWidth 
     if (!heightError && !widthError && (hasSetHeight || hasSetWidth)) {
         CFTypeRef canvas_height = NULL, canvas_width = NULL;
         if (!hasSetHeight) {
-            canvas_height = CFPreferencesCopyValue(CFSTR("canvas_height"), CFSTR("com.michael.iokit.IOMobileGraphicsFamily"), CFSTR("mobile"), kCFPreferencesAnyHost);
+            canvas_height = CFPreferencesCopyValue(CFSTR("canvas_height"), CFSTR("com.apple.iokit.IOMobileGraphicsFamily"), CFSTR("mobile"), kCFPreferencesAnyHost);
         } else {
             canvas_height = CFPreferencesCopyValue(CFSTR("canvas_height"), CFSTR("com.michael.iokit.IOMobileGraphicsFamily"), CFSTR("mobile"), kCFPreferencesAnyHost);
         }
         if (!hasSetWidth) {
-            canvas_width = CFPreferencesCopyValue(CFSTR("canvas_width"), CFSTR("com.michael.iokit.IOMobileGraphicsFamily"), CFSTR("mobile"), kCFPreferencesAnyHost);
+            canvas_width = CFPreferencesCopyValue(CFSTR("canvas_width"), CFSTR("com.apple.iokit.IOMobileGraphicsFamily"), CFSTR("mobile"), kCFPreferencesAnyHost);
         } else {
             canvas_width = CFPreferencesCopyValue(CFSTR("canvas_width"), CFSTR("com.michael.iokit.IOMobileGraphicsFamily"), CFSTR("mobile"), kCFPreferencesAnyHost);
         }
