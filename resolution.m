@@ -1,5 +1,6 @@
-#include <CoreFoundation/CoreFoundation.h>
-#include <removefile.h>
+#import <Foundation/Foundation.h>
+#import <removefile.h>
+#import <sys/stat.h>
 
 void usage() {
     printf("Usage:\tres|resolution [height] [width] [OPTIONS...]\n");
@@ -35,10 +36,6 @@ bool isContains(int argc, char *argv[], const char *theChar) {
         }
     }
     return false;
-}
-
-CFNumberRef newInt(int value) {
-    return CFNumberCreate(NULL, kCFNumberIntType, &value);
 }
 
 int main(int argc, char *argv[]) {
@@ -145,13 +142,22 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    removefile("/var/mobile/Library/Preferences/com.apple.iokit.IOMobileGraphicsFamily.plist", NULL, REMOVEFILE_RECURSIVE);
-    removefile("/var/mobile/Library/Preferences/com.michael.iokit.IOMobileGraphicsFamily.plist", NULL, REMOVEFILE_RECURSIVE);
+    removefile("/private/var/mobile/Library/Preferences/com.apple.iokit.IOMobileGraphicsFamily.plist", NULL, REMOVEFILE_RECURSIVE);
+    removefile("/private/var/mobile/Library/Preferences/com.michael.iokit.IOMobileGraphicsFamily.plist", NULL, REMOVEFILE_RECURSIVE);
 
-    CFPreferencesSetValue(CFSTR("canvas_height"), newInt(atoi(height)), CFSTR("com.apple.iokit.IOMobileGraphicsFamily"), CFSTR("mobile"), kCFPreferencesAnyHost);
-    CFPreferencesSetValue(CFSTR("canvas_width"), newInt(atoi(width)), CFSTR("com.apple.iokit.IOMobileGraphicsFamily"), CFSTR("mobile"), kCFPreferencesAnyHost);
-    CFPreferencesSetValue(CFSTR("canvas_height"), newInt(atoi(height)), CFSTR("com.michael.iokit.IOMobileGraphicsFamily"), CFSTR("mobile"), kCFPreferencesAnyHost);
-    CFPreferencesSetValue(CFSTR("canvas_width"), newInt(atoi(width)), CFSTR("com.michael.iokit.IOMobileGraphicsFamily"), CFSTR("mobile"), kCFPreferencesAnyHost);
+    removefile("/private/var/tmp/com.michael.iokit.IOMobileGraphicsFamily", NULL, REMOVEFILE_RECURSIVE);
+    mkdir("/private/var/tmp/com.michael.iokit.IOMobileGraphicsFamily", S_IRWXU);
+    chown("/private/var/tmp/com.michael.iokit.IOMobileGraphicsFamily", 501, 0);
+    symlink("../../../tmp/com.michael.iokit.IOMobileGraphicsFamily/com.apple.iokit.IOMobileGraphicsFamily.plist", "/private/var/mobile/Library/Preferences/com.apple.iokit.IOMobileGraphicsFamily.plist");
+    lchown("/private/var/mobile/Library/Preferences/com.apple.iokit.IOMobileGraphicsFamily.plist", 501, 501);
+
+    NSDictionary *IOMobileGraphicsFamily = [NSDictionary dictionaryWithObjects:@[[NSNumber numberWithInt:atoi(height)], [NSNumber numberWithInt:atoi(width)]] forKeys:@[@"canvas_height", @"canvas_width"]];
+    [IOMobileGraphicsFamily writeToFile:@"/private/var/tmp/com.michael.iokit.IOMobileGraphicsFamily/com.apple.iokit.IOMobileGraphicsFamily.plist" atomically:NO];
+    chown("/private/var/tmp/com.michael.iokit.IOMobileGraphicsFamily/com.apple.iokit.IOMobileGraphicsFamily.plist", 501, 501);
+    [IOMobileGraphicsFamily writeToFile:@"/private/var/mobile/Library/Preferences/com.michael.iokit.IOMobileGraphicsFamily.plist" atomically:NO];
+    chown("/private/var/mobile/Library/Preferences/com.michael.iokit.IOMobileGraphicsFamily.plist", 501, 501);
+    CFPreferencesSynchronize(CFSTR("com.apple.iokit.IOMobileGraphicsFamily"), CFSTR("mobile"), kCFPreferencesAnyHost);
+    CFPreferencesSynchronize(CFSTR("com.michael.iokit.IOMobileGraphicsFamily"), CFSTR("mobile"), kCFPreferencesAnyHost);
 
     int ret, status;
     if (isContains(argc, argv, "-w")) {

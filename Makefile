@@ -1,14 +1,11 @@
-export TARGET = iphone:clang:13.0:9.0
-export ARCHS = armv7 arm64 arm64e
-export VERSION = 0.7.3
-export DEBUG = no
+VERSION = 0.8.0
 Package = com.michael.resolutionsetter
-CC = xcrun -sdk ${THEOS}/sdks/iPhoneOS13.0.sdk clang -arch armv7 -arch arm64 -arch arm64e -miphoneos-version-min=9.0 -framework CoreFoundation
+CC = xcrun -sdk ${THEOS}/sdks/iPhoneOS13.0.sdk clang -arch armv7 -arch arm64 -arch arm64e -miphoneos-version-min=9.0 -fobjc-arc
 LDID = ldid
 
 .PHONY: all clean
 
-all: clean resolution preferenceloaderBundle
+all: clean resolution ResolutionSetterRootListController
 	mkdir $(Package)_$(VERSION)_iphoneos-arm
 	mkdir $(Package)_$(VERSION)_iphoneos-arm/DEBIAN
 	cp control $(Package)_$(VERSION)_iphoneos-arm/DEBIAN
@@ -19,19 +16,22 @@ all: clean resolution preferenceloaderBundle
 	mkdir $(Package)_$(VERSION)_iphoneos-arm/Library
 	mkdir $(Package)_$(VERSION)_iphoneos-arm/Library/PreferenceLoader
 	mkdir $(Package)_$(VERSION)_iphoneos-arm/Library/PreferenceLoader/Preferences
-	cp preferenceloaderBundle/entry.plist $(Package)_$(VERSION)_iphoneos-arm/Library/PreferenceLoader/Preferences/ResolutionSetter.plist
+	cp entry.plist $(Package)_$(VERSION)_iphoneos-arm/Library/PreferenceLoader/Preferences/ResolutionSetter.plist
 	mkdir $(Package)_$(VERSION)_iphoneos-arm/Library/PreferenceBundles
-	mv preferenceloaderBundle/.theos/obj/ResolutionSetter.bundle $(Package)_$(VERSION)_iphoneos-arm/Library/PreferenceBundles
+	cp -r Resources $(Package)_$(VERSION)_iphoneos-arm/Library/PreferenceBundles/ResolutionSetter.bundle
+	mv ResolutionSetter $(Package)_$(VERSION)_iphoneos-arm/Library/PreferenceBundles/ResolutionSetter.bundle
 	dpkg -b $(Package)_$(VERSION)_iphoneos-arm
 
 resolution: clean
-	$(CC) resolution.c -o resolution
+	$(CC) resolution.m -o resolution
 	strip resolution
 	$(LDID) -Sentitlements.xml resolution
 
-preferenceloaderBundle: clean
-	cd preferenceloaderBundle && make
+ResolutionSetterRootListController: clean
+	$(CC) -dynamiclib -install_name /Library/PreferenceBundles/ResolutionSetter.bundle/ResolutionSetter -I${THEOS}/vendor/include/ -framework UIKit ${THEOS}/sdks/iPhoneOS13.0.sdk/System/Library/PrivateFrameworks/Preferences.framework/Preferences.tbd ResolutionSetterRootListController.m -o ResolutionSetter
+	strip -x ResolutionSetter
+	$(LDID) -S ResolutionSetter
 
 clean:
-	rm -rf com.michael.resolutionsetter_* preferenceloaderBundle/.theos
-	rm -f resolution
+	rm -rf com.michael.resolutionsetter_*
+	rm -f resolution ResolutionSetter
