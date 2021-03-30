@@ -1,4 +1,4 @@
-VERSION = 0.8.0
+VERSION = 0.8.1
 Package = com.michael.resolutionsetter
 CC = xcrun -sdk ${THEOS}/sdks/iPhoneOS13.0.sdk clang -arch armv7 -arch arm64 -arch arm64e -miphoneos-version-min=9.0 -fobjc-arc
 LDID = ldid

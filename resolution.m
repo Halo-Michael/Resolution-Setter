@@ -53,12 +53,6 @@ int main(int argc, char *argv[]) {
         if (!is_number(argv[1]) || !is_number(argv[2])) {
             printf("Invalid parameters, you may have no idea what you are doing, now exit.\n");
             return 1;
-        } else if (strlen(argv[1]) > 4 || strlen(argv[2]) > 4) {
-            printf("The resolution is too high, you may have no idea what you are doing, now exit.\n");
-            return 2;
-        } else if (strlen(argv[1]) < 3 || strlen(argv[2]) < 3) {
-            printf("The resolution is too low, you may have no idea what you are doing, now exit.\n");
-            return 2;
         }
     }
 
@@ -117,12 +111,6 @@ int main(int argc, char *argv[]) {
                 if (!is_number(tmp_width)) {
                     printf("Invalid parameters, you may have no idea what you are doing, now exit.\n");
                     return 1;
-                } else if (strLen > 5) {
-                    printf("Width is too high, you may have no idea what you are doing, now exit.\n");
-                    return 2;
-                } else if (strLen < 4) {
-                    printf("Width is too low, you may have no idea what you are doing, now exit.\n");
-                    return 2;
                 }
                 width = tmp_width;
 
@@ -147,16 +135,16 @@ int main(int argc, char *argv[]) {
 
     removefile("/private/var/tmp/com.michael.iokit.IOMobileGraphicsFamily", NULL, REMOVEFILE_RECURSIVE);
     mkdir("/private/var/tmp/com.michael.iokit.IOMobileGraphicsFamily", S_IRWXU);
-    chown("/private/var/tmp/com.michael.iokit.IOMobileGraphicsFamily", 501, 0);
+    lchown("/private/var/tmp/com.michael.iokit.IOMobileGraphicsFamily", 501, 501);
     symlink("../../../tmp/com.michael.iokit.IOMobileGraphicsFamily/com.apple.iokit.IOMobileGraphicsFamily.plist", "/private/var/mobile/Library/Preferences/com.apple.iokit.IOMobileGraphicsFamily.plist");
     lchown("/private/var/mobile/Library/Preferences/com.apple.iokit.IOMobileGraphicsFamily.plist", 501, 501);
 
     NSDictionary *IOMobileGraphicsFamily = [NSDictionary dictionaryWithObjects:@[[NSNumber numberWithInt:atoi(height)], [NSNumber numberWithInt:atoi(width)]] forKeys:@[@"canvas_height", @"canvas_width"]];
     [IOMobileGraphicsFamily writeToFile:@"/private/var/tmp/com.michael.iokit.IOMobileGraphicsFamily/com.apple.iokit.IOMobileGraphicsFamily.plist" atomically:NO];
-    chown("/private/var/tmp/com.michael.iokit.IOMobileGraphicsFamily/com.apple.iokit.IOMobileGraphicsFamily.plist", 501, 501);
-    [IOMobileGraphicsFamily writeToFile:@"/private/var/mobile/Library/Preferences/com.michael.iokit.IOMobileGraphicsFamily.plist" atomically:NO];
-    chown("/private/var/mobile/Library/Preferences/com.michael.iokit.IOMobileGraphicsFamily.plist", 501, 501);
+    lchown("/private/var/tmp/com.michael.iokit.IOMobileGraphicsFamily/com.apple.iokit.IOMobileGraphicsFamily.plist", 501, 501);
     CFPreferencesSynchronize(CFSTR("com.apple.iokit.IOMobileGraphicsFamily"), CFSTR("mobile"), kCFPreferencesAnyHost);
+    [IOMobileGraphicsFamily writeToFile:@"/private/var/mobile/Library/Preferences/com.michael.iokit.IOMobileGraphicsFamily.plist" atomically:NO];
+    lchown("/private/var/mobile/Library/Preferences/com.michael.iokit.IOMobileGraphicsFamily.plist", 501, 501);
     CFPreferencesSynchronize(CFSTR("com.michael.iokit.IOMobileGraphicsFamily"), CFSTR("mobile"), kCFPreferencesAnyHost);
 
     int ret, status;
