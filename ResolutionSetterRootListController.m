@@ -1,8 +1,6 @@
 #import <Preferences/PSListController.h>
 #import <Preferences/PSSpecifier.h>
 
-bool hasSetHeight = false, hasSetWidth = false;
-
 @interface ResolutionSetterRootListController : PSListController
 
 @end
@@ -17,17 +15,11 @@ bool hasSetHeight = false, hasSetWidth = false;
 }
 
 - (void)setPreferenceValue:(id)value specifier:(PSSpecifier*)specifier {
-    if ([[specifier propertyForKey:@"key"] isEqualToString:@"canvas_height"]) {
-        hasSetHeight = true;
-    }
-    if ([[specifier propertyForKey:@"key"] isEqualToString:@"canvas_width"]) {
-        hasSetWidth = true;
-    }
     [super setPreferenceValue:value specifier:specifier];
 }
 
 - (id)readPreferenceValue:(PSSpecifier*)specifier {
-    if ([[specifier propertyForKey:@"key"] isEqualToString:@"canvas_height"] || [[specifier propertyForKey:@"key"] isEqualToString:@"canvas_width"]) {
+    if ([[specifier propertyForKey:@"key"] isEqual:@"canvas_height"] || [[specifier propertyForKey:@"key"] isEqual:@"canvas_width"]) {
         return [[[NSUserDefaults alloc] _initWithSuiteName:@"com.apple.iokit.IOMobileGraphicsFamily" container:[NSURL URLWithString:@"file:///private/var/mobile"]] objectForKey:[specifier propertyForKey:@"key"]];
     }
     return [super readPreferenceValue:specifier];
@@ -35,26 +27,21 @@ bool hasSetHeight = false, hasSetWidth = false;
 
 -(void)setresolution {
     [self.view endEditing:YES];
-    if (hasSetHeight || hasSetWidth) {
-        CFTypeRef canvas_height = NULL, canvas_width = NULL;
-        if (!hasSetHeight) {
-            canvas_height = CFPreferencesCopyValue(CFSTR("canvas_height"), CFSTR("com.apple.iokit.IOMobileGraphicsFamily"), CFSTR("mobile"), kCFPreferencesAnyHost);
+    BOOL notSetHeight = [[[[NSUserDefaults alloc] _initWithSuiteName:@"com.apple.iokit.IOMobileGraphicsFamily" container:[NSURL URLWithString:@"file:///private/var/mobile"]] objectForKey:@"canvas_height"] isEqual:[[[NSUserDefaults alloc] _initWithSuiteName:@"com.michael.iokit.IOMobileGraphicsFamily" container:[NSURL URLWithString:@"file:///private/var/mobile"]] objectForKey:@"canvas_height"]], notSetWidth = [[[[NSUserDefaults alloc] _initWithSuiteName:@"com.apple.iokit.IOMobileGraphicsFamily" container:[NSURL URLWithString:@"file:///private/var/mobile"]] objectForKey:@"canvas_width"] isEqual:[[[NSUserDefaults alloc] _initWithSuiteName:@"com.michael.iokit.IOMobileGraphicsFamily" container:[NSURL URLWithString:@"file:///private/var/mobile"]] objectForKey:@"canvas_width"]];
+    if (!notSetHeight || !notSetWidth) {
+        id canvas_height = nil, canvas_width = nil;
+        if (notSetHeight) {
+            canvas_height = [[[NSUserDefaults alloc] _initWithSuiteName:@"com.apple.iokit.IOMobileGraphicsFamily" container:[NSURL URLWithString:@"file:///private/var/mobile"]] objectForKey:@"canvas_height"];
         } else {
-            canvas_height = CFPreferencesCopyValue(CFSTR("canvas_height"), CFSTR("com.michael.iokit.IOMobileGraphicsFamily"), CFSTR("mobile"), kCFPreferencesAnyHost);
+            canvas_height = [[[NSUserDefaults alloc] _initWithSuiteName:@"com.michael.iokit.IOMobileGraphicsFamily" container:[NSURL URLWithString:@"file:///private/var/mobile"]] objectForKey:@"canvas_height"];
         }
-        if (!hasSetWidth) {
-            canvas_width = CFPreferencesCopyValue(CFSTR("canvas_width"), CFSTR("com.apple.iokit.IOMobileGraphicsFamily"), CFSTR("mobile"), kCFPreferencesAnyHost);
+        if (notSetWidth) {
+            canvas_width = [[[NSUserDefaults alloc] _initWithSuiteName:@"com.apple.iokit.IOMobileGraphicsFamily" container:[NSURL URLWithString:@"file:///private/var/mobile"]] objectForKey:@"canvas_width"];
         } else {
-            canvas_width = CFPreferencesCopyValue(CFSTR("canvas_width"), CFSTR("com.michael.iokit.IOMobileGraphicsFamily"), CFSTR("mobile"), kCFPreferencesAnyHost);
+            canvas_width = [[[NSUserDefaults alloc] _initWithSuiteName:@"com.michael.iokit.IOMobileGraphicsFamily" container:[NSURL URLWithString:@"file:///private/var/mobile"]] objectForKey:@"canvas_width"];
         }
-        if (canvas_height != NULL && canvas_width != NULL) {
+        if (canvas_height != nil && canvas_width != nil) {
             system([[NSString stringWithFormat:@"resolution %@ %@ -y", canvas_height, canvas_width] UTF8String]);
-        }
-        if (canvas_height != NULL) {
-            CFRelease(canvas_height);
-        }
-        if (canvas_width != NULL) {
-            CFRelease(canvas_width);
         }
     }
 }

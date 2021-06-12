@@ -1,6 +1,8 @@
-VERSION = 0.8.1
+VERSION = 0.8.2
 Package = com.michael.resolutionsetter
-CC = xcrun -sdk ${THEOS}/sdks/iPhoneOS13.0.sdk clang -arch armv7 -arch arm64 -arch arm64e -miphoneos-version-min=9.0 -fobjc-arc
+SDK = ${THEOS}/sdks/iPhoneOS13.0.sdk
+OBJCC = xcrun -sdk $(SDK) clang -arch armv7 -arch arm64 -arch arm64e -miphoneos-version-min=9.0 -F $(SDK)/System/Library/PrivateFrameworks -I${THEOS}/vendor/include -fobjc-arc -O2
+SED = gsed
 LDID = ldid
 
 .PHONY: all clean
@@ -9,6 +11,7 @@ all: clean resolution ResolutionSetterRootListController
 	mkdir $(Package)_$(VERSION)_iphoneos-arm
 	mkdir $(Package)_$(VERSION)_iphoneos-arm/DEBIAN
 	cp control $(Package)_$(VERSION)_iphoneos-arm/DEBIAN
+	$(SED) -i 's/^Version:\x24/Version: $(VERSION)/g' $(Package)_$(VERSION)_iphoneos-arm/DEBIAN/control
 	mkdir $(Package)_$(VERSION)_iphoneos-arm/usr
 	mkdir $(Package)_$(VERSION)_iphoneos-arm/usr/bin
 	mv resolution $(Package)_$(VERSION)_iphoneos-arm/usr/bin
@@ -23,15 +26,15 @@ all: clean resolution ResolutionSetterRootListController
 	dpkg -b $(Package)_$(VERSION)_iphoneos-arm
 
 resolution: clean
-	$(CC) resolution.m -o resolution
+	$(OBJCC) resolution.m -o resolution
 	strip resolution
 	$(LDID) -Sentitlements.xml resolution
 
 ResolutionSetterRootListController: clean
-	$(CC) -dynamiclib -install_name /Library/PreferenceBundles/ResolutionSetter.bundle/ResolutionSetter -I${THEOS}/vendor/include/ -framework UIKit ${THEOS}/sdks/iPhoneOS13.0.sdk/System/Library/PrivateFrameworks/Preferences.framework/Preferences.tbd ResolutionSetterRootListController.m -o ResolutionSetter
+	$(OBJCC) -dynamiclib -install_name /Library/PreferenceBundles/ResolutionSetter.bundle/ResolutionSetter -framework UIKit -framework Preferences ResolutionSetterRootListController.m -o ResolutionSetter
 	strip -x ResolutionSetter
 	$(LDID) -S ResolutionSetter
 
 clean:
-	rm -rf com.michael.resolutionsetter_*
+	rm -rf $(Package)_*_iphoneos-arm*
 	rm -f resolution ResolutionSetter

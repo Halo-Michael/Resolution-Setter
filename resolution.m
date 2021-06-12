@@ -2,14 +2,19 @@
 #import <removefile.h>
 #import <sys/stat.h>
 
+typedef struct {
+    char *size;
+    bool allocated;
+} side;
+
 void usage() {
-    printf("Usage:\tres|resolution [height] [width] [OPTIONS...]\n");
-    printf("\t-h\tPrint this help.\n");
-    printf("\t-w\tSet resolution without auto respring. You may need to manual respring.\n");
-    printf("\t-y\tPass the confirm message.\n");
+    puts("Usage:\tres|resolution [height] [width] [OPTIONS...]");
+    puts("\t-h\tPrint this help.");
+    puts("\t-w\tSet resolution without auto respring. You may need to manual respring.");
+    puts("\t-y\tPass the confirm message.");
 }
 
-bool is_number(const char *num) {
+bool isNumber(const char *num) {
     if (strcmp(num, "0") == 0) {
         return true;
     }
@@ -50,23 +55,23 @@ int main(int argc, char *argv[]) {
     }
 
     if (argc > 2) {
-        if (!is_number(argv[1]) || !is_number(argv[2])) {
-            printf("Invalid parameters, you may have no idea what you are doing, now exit.\n");
+        if (!isNumber(argv[1]) || !isNumber(argv[2])) {
+            puts("Invalid parameters, you may have no idea what you are doing, now exit.");
             return 1;
         }
     }
 
-    char *height, *width;
+    side height = {NULL, false}, width = {NULL, false};
 
     if (argc > 2) {
-        height = argv[1];
-        width = argv[2];
+        height.size = argv[1];
+        width.size = argv[2];
     }
 
     if (argc == 1 || !isContains(argc, argv, "-y")) {
         char confirm;
         if (argc > 2) {
-            printf("Are you sure you want to set the resolution to %sx%s?(y/n)", height, width);
+            printf("Are you sure you want to set the resolution to %sx%s?(y/n)", height.size, width.size);
             confirm = getchar();
             while (getchar() != '\n') {
                 getchar();
@@ -85,17 +90,18 @@ int main(int argc, char *argv[]) {
                 }
                 tmp_height[strLen - 1] = '\0';
 
-                if (!is_number(tmp_height)) {
-                    printf("Invalid parameters, you may have no idea what you are doing, now exit.\n");
+                if (!isNumber(tmp_height)) {
+                    puts("Invalid parameters, you may have no idea what you are doing, now exit.");
                     return 1;
                 } else if (strLen > 5) {
-                    printf("Height is too high, you may have no idea what you are doing, now exit.\n");
+                    puts("Height is too high, you may have no idea what you are doing, now exit.");
                     return 2;
                 } else if (strLen < 4) {
-                    printf("Height is too low, you may have no idea what you are doing, now exit.\n");
+                    puts("Height is too low, you may have no idea what you are doing, now exit.");
                     return 2;
                 }
-                height = tmp_height;
+                height.size = tmp_height;
+                height.allocated = true;
 
                 strLen = 1;
                 char *tmp_width = (char *)malloc(sizeof(char) * strLen);
@@ -108,24 +114,31 @@ int main(int argc, char *argv[]) {
                 }
                 tmp_width[strLen - 1] = '\0';
 
-                if (!is_number(tmp_width)) {
-                    printf("Invalid parameters, you may have no idea what you are doing, now exit.\n");
+                if (!isNumber(tmp_width)) {
+                    puts("Invalid parameters, you may have no idea what you are doing, now exit.");
                     return 1;
+                } else if (strLen > 5) {
+                    puts("Width is too high, you may have no idea what you are doing, now exit.");
+                    return 2;
+                } else if (strLen < 4) {
+                    puts("Width is too low, you may have no idea what you are doing, now exit.");
+                    return 2;
                 }
-                width = tmp_width;
+                width.size = tmp_width;
+                width.allocated = true;
 
-                printf("Are you sure you want to set the resolution to %sx%s?(y/n)", height, width);
+                printf("Are you sure you want to set the resolution to %sx%s?(y/n)", height.size, width.size);
                 confirm = getchar();
                 while (getchar() != '\n') {
                     getchar();
                 }
                 if (confirm != 'y' && confirm != 'Y' && confirm != 'n' && confirm != 'N') {
-                    printf("Invalid parameters, you may have no idea what you are doing, now exit.\n");
+                    puts("Invalid parameters, you may have no idea what you are doing, now exit.");
                     return 1;
                 }
             }
         } else if (confirm != 'y' && confirm != 'Y') {
-            printf("Invalid parameters, you may have no idea what you are doing, now exit.\n");
+            puts("Invalid parameters, you may have no idea what you are doing, now exit.");
             return 1;
         }
     }
@@ -134,27 +147,38 @@ int main(int argc, char *argv[]) {
     removefile("/private/var/mobile/Library/Preferences/com.michael.iokit.IOMobileGraphicsFamily.plist", NULL, REMOVEFILE_RECURSIVE);
 
     removefile("/private/var/tmp/com.michael.iokit.IOMobileGraphicsFamily", NULL, REMOVEFILE_RECURSIVE);
-    mkdir("/private/var/tmp/com.michael.iokit.IOMobileGraphicsFamily", S_IRWXU);
+    mkdir("/private/var/tmp/com.michael.iokit.IOMobileGraphicsFamily", 755);
     lchown("/private/var/tmp/com.michael.iokit.IOMobileGraphicsFamily", 501, 501);
     symlink("../../../tmp/com.michael.iokit.IOMobileGraphicsFamily/com.apple.iokit.IOMobileGraphicsFamily.plist", "/private/var/mobile/Library/Preferences/com.apple.iokit.IOMobileGraphicsFamily.plist");
     lchown("/private/var/mobile/Library/Preferences/com.apple.iokit.IOMobileGraphicsFamily.plist", 501, 501);
 
-    NSDictionary *IOMobileGraphicsFamily = [NSDictionary dictionaryWithObjects:@[[NSNumber numberWithInt:atoi(height)], [NSNumber numberWithInt:atoi(width)]] forKeys:@[@"canvas_height", @"canvas_width"]];
+    NSDictionary *IOMobileGraphicsFamily = [NSDictionary dictionaryWithObjects:@[[NSNumber numberWithInt:atoi(height.size)], [NSNumber numberWithInt:atoi(width.size)]] forKeys:@[@"canvas_height", @"canvas_width"]];
     [IOMobileGraphicsFamily writeToFile:@"/private/var/tmp/com.michael.iokit.IOMobileGraphicsFamily/com.apple.iokit.IOMobileGraphicsFamily.plist" atomically:NO];
     lchown("/private/var/tmp/com.michael.iokit.IOMobileGraphicsFamily/com.apple.iokit.IOMobileGraphicsFamily.plist", 501, 501);
-    CFPreferencesSynchronize(CFSTR("com.apple.iokit.IOMobileGraphicsFamily"), CFSTR("mobile"), kCFPreferencesAnyHost);
+    [[[NSUserDefaults alloc] _initWithSuiteName:@"com.apple.iokit.IOMobileGraphicsFamily" container:[NSURL URLWithString:@"file:///private/var/mobile"]] synchronize];
     [IOMobileGraphicsFamily writeToFile:@"/private/var/mobile/Library/Preferences/com.michael.iokit.IOMobileGraphicsFamily.plist" atomically:NO];
     lchown("/private/var/mobile/Library/Preferences/com.michael.iokit.IOMobileGraphicsFamily.plist", 501, 501);
-    CFPreferencesSynchronize(CFSTR("com.michael.iokit.IOMobileGraphicsFamily"), CFSTR("mobile"), kCFPreferencesAnyHost);
+    [[[NSUserDefaults alloc] _initWithSuiteName:@"com.michael.iokit.IOMobileGraphicsFamily" container:[NSURL URLWithString:@"file:///private/var/mobile"]] synchronize];
 
-    int ret, status;
+    int ret = 0;
     if (isContains(argc, argv, "-w")) {
-        printf("Successfully set the resolution to %sx%s, you should manual respring your drvice.\n", height, width);
-        ret = 0;
+        printf("Successfully set the resolution to %sx%s, you should manual respring your drvice.\n", height.size, width.size);
+        if (height.allocated) {
+            free(height.size);
+        }
+        if (width.allocated) {
+            free(width.size);
+        }
     } else {
-        printf("Successfully set the resolution to %sx%s, the device will be respring.\n", height, width);
+        printf("Successfully set the resolution to %sx%s, the device will be respring.\n", height.size, width.size);
+        if (height.allocated) {
+            free(height.size);
+        }
+        if (width.allocated) {
+            free(width.size);
+        }
         sleep(1);
-        status = system("killall -9 backboardd");
+        int status = system("killall -9 backboardd");
         ret = WEXITSTATUS(status);
     }
     return ret;
