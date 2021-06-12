@@ -155,10 +155,10 @@ int main(int argc, char *argv[]) {
     NSDictionary *IOMobileGraphicsFamily = [NSDictionary dictionaryWithObjects:@[[NSNumber numberWithInt:atoi(height.size)], [NSNumber numberWithInt:atoi(width.size)]] forKeys:@[@"canvas_height", @"canvas_width"]];
     [IOMobileGraphicsFamily writeToFile:@"/private/var/tmp/com.michael.iokit.IOMobileGraphicsFamily/com.apple.iokit.IOMobileGraphicsFamily.plist" atomically:NO];
     lchown("/private/var/tmp/com.michael.iokit.IOMobileGraphicsFamily/com.apple.iokit.IOMobileGraphicsFamily.plist", 501, 501);
-    [[[NSUserDefaults alloc] _initWithSuiteName:@"com.apple.iokit.IOMobileGraphicsFamily" container:[NSURL URLWithString:@"file:///private/var/mobile"]] synchronize];
+    CFPreferencesSynchronize(CFSTR("com.apple.iokit.IOMobileGraphicsFamily"), CFSTR("mobile"), kCFPreferencesAnyHost);
     [IOMobileGraphicsFamily writeToFile:@"/private/var/mobile/Library/Preferences/com.michael.iokit.IOMobileGraphicsFamily.plist" atomically:NO];
     lchown("/private/var/mobile/Library/Preferences/com.michael.iokit.IOMobileGraphicsFamily.plist", 501, 501);
-    [[[NSUserDefaults alloc] _initWithSuiteName:@"com.michael.iokit.IOMobileGraphicsFamily" container:[NSURL URLWithString:@"file:///private/var/mobile"]] synchronize];
+    CFPreferencesSynchronize(CFSTR("com.michael.iokit.IOMobileGraphicsFamily"), CFSTR("mobile"), kCFPreferencesAnyHost);
 
     int ret = 0;
     if (isContains(argc, argv, "-w")) {
