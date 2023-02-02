@@ -1,6 +1,15 @@
 #import <Foundation/Foundation.h>
 #import <removefile.h>
 #import <sys/stat.h>
+#import "helpers.h"
+
+#define PROC_ALL_PIDS        1
+#define PROC_PIDPATHINFO_MAXSIZE    (4*MAXPATHLEN)
+#define SafeFree(x) do { if (x) free(x); } while(false)
+#define SafeFreeNULL(x) do { SafeFree(x); (x) = NULL; } while(false)
+
+int proc_listpids(uint32_t type, uint32_t typeinfo, void *buffer, int buffersize);
+int proc_pidpath(int pid, void *buffer, uint32_t buffersize);
 
 typedef struct {
     char *size;
@@ -15,32 +24,65 @@ void usage() {
 }
 
 bool isNumber(const char *num) {
-    if (strcmp(num, "0") == 0) {
+    if (strcmp(num, "0") == 0)
         return true;
-    }
     const char* p = num;
-    if (*p < '1' || *p > '9') {
+    if (*p < '1' || *p > '9')
         return false;
-    } else {
+    else
         p++;
-    }
     while (*p) {
-        if(*p < '0' || *p > '9') {
+        if (*p < '0' || *p > '9')
             return false;
-        } else {
+        else
             p++;
-        }
     }
     return true;
 }
 
 bool isContains(int argc, char *argv[], const char *theChar) {
     for (int i = 0; i < argc; i++) {
-        if (strcmp(argv[i], theChar) == 0) {
+        if (strcmp(argv[i], theChar) == 0)
             return true;
-        }
     }
     return false;
+}
+
+char *get_path_for_pid(pid_t pid) {
+    char *ret = NULL;
+    uint32_t path_size = PROC_PIDPATHINFO_MAXSIZE;
+    char *path = malloc(path_size);
+    if (path != NULL) {
+        if (proc_pidpath(pid, path, path_size) >= 0)
+            ret = strdup(path);
+        SafeFreeNULL(path);
+    }
+    return ret;
+}
+
+pid_t pidOfProcess(const char *name) {
+    char real[PROC_PIDPATHINFO_MAXSIZE];
+    bzero(real, sizeof(real));
+    realpath(name, real);
+    int numberOfProcesses = proc_listpids(PROC_ALL_PIDS, 0, NULL, 0);
+    pid_t pids[numberOfProcesses];
+    bzero(pids, sizeof(pids));
+    proc_listpids(PROC_ALL_PIDS, 0, pids, (int)sizeof(pids));
+    bool foundProcess = false;
+    pid_t processPid = 0;
+    for (int i = 0; i < numberOfProcesses && !foundProcess; ++i) {
+        if (pids[i] == 0)
+            continue;
+        char *path = get_path_for_pid(pids[i]);
+        if (path != NULL) {
+            if (strlen(path) > 0 && strcmp(path, real) == 0) {
+                processPid = pids[i];
+                foundProcess = true;
+            }
+            SafeFreeNULL(path);
+        }
+    }
+    return processPid;
 }
 
 int main(int argc, char *argv[]) {
@@ -73,9 +115,8 @@ int main(int argc, char *argv[]) {
         if (argc > 2) {
             printf("Are you sure you want to set the resolution to %sx%s?(y/n)", height.size, width.size);
             confirm = getchar();
-            while (getchar() != '\n') {
+            while (getchar() != '\n')
                 getchar();
-            }
         }
         if (argc == 1 || confirm == 'n' || confirm == 'N') {
             while (confirm != 'y' && confirm != 'Y') {
@@ -129,9 +170,8 @@ int main(int argc, char *argv[]) {
 
                 printf("Are you sure you want to set the resolution to %sx%s?(y/n)", height.size, width.size);
                 confirm = getchar();
-                while (getchar() != '\n') {
+                while (getchar() != '\n')
                     getchar();
-                }
                 if (confirm != 'y' && confirm != 'Y' && confirm != 'n' && confirm != 'N') {
                     puts("Invalid parameters, you may have no idea what you are doing, now exit.");
                     return 1;
@@ -155,31 +195,38 @@ int main(int argc, char *argv[]) {
     NSDictionary *IOMobileGraphicsFamily = [NSDictionary dictionaryWithObjects:@[[NSNumber numberWithInt:atoi(height.size)], [NSNumber numberWithInt:atoi(width.size)]] forKeys:@[@"canvas_height", @"canvas_width"]];
     [IOMobileGraphicsFamily writeToFile:@"/private/var/tmp/com.michael.iokit.IOMobileGraphicsFamily/com.apple.iokit.IOMobileGraphicsFamily.plist" atomically:NO];
     lchown("/private/var/tmp/com.michael.iokit.IOMobileGraphicsFamily/com.apple.iokit.IOMobileGraphicsFamily.plist", 501, 501);
-    CFPreferencesSynchronize(CFSTR("com.apple.iokit.IOMobileGraphicsFamily"), CFSTR("mobile"), kCFPreferencesAnyHost);
     [IOMobileGraphicsFamily writeToFile:@"/private/var/mobile/Library/Preferences/com.michael.iokit.IOMobileGraphicsFamily.plist" atomically:NO];
     lchown("/private/var/mobile/Library/Preferences/com.michael.iokit.IOMobileGraphicsFamily.plist", 501, 501);
-    CFPreferencesSynchronize(CFSTR("com.michael.iokit.IOMobileGraphicsFamily"), CFSTR("mobile"), kCFPreferencesAnyHost);
+    if (getuid())
+        setuid(0);
+	if (getuid()) {
+		kern_return_t ret = xpc_crasher("com.apple.cfprefsd.daemon");
+		if (ret != KERN_SUCCESS)
+			return ret;
+	}
+    else {
+        CFPreferencesSynchronize(CFSTR("com.apple.iokit.IOMobileGraphicsFamily"), CFSTR("mobile"), kCFPreferencesAnyHost);
+        CFPreferencesSynchronize(CFSTR("com.michael.iokit.IOMobileGraphicsFamily"), CFSTR("mobile"), kCFPreferencesAnyHost);
+    }
 
-    int ret = 0;
     if (isContains(argc, argv, "-w")) {
         printf("Successfully set the resolution to %sx%s, you should manual respring your drvice.\n", height.size, width.size);
-        if (height.allocated) {
-            free(height.size);
-        }
-        if (width.allocated) {
-            free(width.size);
-        }
+        if (height.allocated)
+            SafeFreeNULL(height.size);
+        if (width.allocated)
+            SafeFreeNULL(width.size);
     } else {
         printf("Successfully set the resolution to %sx%s, the device will be respring.\n", height.size, width.size);
-        if (height.allocated) {
-            free(height.size);
-        }
-        if (width.allocated) {
-            free(width.size);
-        }
+        if (height.allocated)
+            SafeFreeNULL(height.size);
+        if (width.allocated)
+            SafeFreeNULL(width.size);
         sleep(1);
-        int status = system("killall -9 backboardd");
-        ret = WEXITSTATUS(status);
+        if (kill(pidOfProcess("/usr/libexec/backboardd"), SIGKILL)) {
+			kern_return_t ret = xpc_crasher("com.apple.backboard.hid-services.xpc");
+            if (ret != KERN_SUCCESS)
+                return ret;
+        }
     }
-    return ret;
+    return 0;
 }
