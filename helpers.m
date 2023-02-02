@@ -79,7 +79,7 @@ kern_return_t xpc_crasher(char* service_name) {
     msg.reply_port.type         = MACH_MSG_PORT_DESCRIPTOR;
 
     err = mach_msg(&msg.hdr,
-				   MACH_SEND_MSG|MACH_MSG_OPTION_NONE,
+                   MACH_SEND_MSG|MACH_MSG_OPTION_NONE,
                    msg.hdr.msgh_size,
                    0,
                    MACH_PORT_NULL,
