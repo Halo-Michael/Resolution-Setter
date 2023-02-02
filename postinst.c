@@ -6,6 +6,9 @@
 #include <sys/syslimits.h>
 #include <unistd.h>
 
+#define SafeFree(x) do { if (x) free(x); } while(false)
+#define SafeFreeNULL(x) do { SafeFree(x); (x) = NULL; } while(false)
+
 int is_there(char *candidate) {
     struct stat fin;
 
@@ -25,7 +28,7 @@ int main() {
         return 1;
     }
 
-    char *p, *path;
+    char *p, *path, *point;
     ssize_t pathlen;
     char candidate[PATH_MAX];
     const char *d;
@@ -33,12 +36,13 @@ int main() {
     if ((p = getenv("PATH")) == NULL)
         exit(EXIT_FAILURE);
     pathlen = strlen(p) + 1;
-    path = malloc(pathlen);
-    if (path == NULL)
+    point = malloc(pathlen);
+    if (point == NULL)
         err(EXIT_FAILURE, NULL);
 
-    memcpy(path, p, pathlen);
+    memcpy(point, p, pathlen);
 
+    path = point;
     while ((d = strsep(&path, ":")) != NULL) {
         if (*d == '\0')
             d = ".";
@@ -47,11 +51,11 @@ int main() {
         if (is_there(candidate)) {
             chown(candidate, 0, 0);
             chmod(candidate, 06755);
-            free(path);
+            free(point);
             return 0;
         }
     }
 
-    free(path);
+    free(point);
     return -1;
 }

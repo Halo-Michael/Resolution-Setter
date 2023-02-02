@@ -19,7 +19,7 @@ typedef struct {
 void usage() {
     puts("Usage:\tres|resolution [height] [width] [OPTIONS...]");
     puts("\t-h\tPrint this help.");
-    puts("\t-w\tSet resolution without auto respring. You may need to manual respring.");
+    puts("\t-w\tSet resolution without auto respring. You may need to respring manually.");
     puts("\t-y\tPass the confirm message.");
 }
 
@@ -203,26 +203,24 @@ int main(int argc, char *argv[]) {
 		kern_return_t ret = xpc_crasher("com.apple.cfprefsd.daemon");
 		if (ret != KERN_SUCCESS)
 			return ret;
-	}
-    else {
+	} else {
         CFPreferencesSynchronize(CFSTR("com.apple.iokit.IOMobileGraphicsFamily"), CFSTR("mobile"), kCFPreferencesAnyHost);
         CFPreferencesSynchronize(CFSTR("com.michael.iokit.IOMobileGraphicsFamily"), CFSTR("mobile"), kCFPreferencesAnyHost);
     }
 
     if (isContains(argc, argv, "-w")) {
-        printf("Successfully set the resolution to %sx%s, you should manual respring your drvice.\n", height.size, width.size);
+        printf("Successfully set the resolution to %sx%s, you should respring your device manually.\n", height.size, width.size);
         if (height.allocated)
             SafeFreeNULL(height.size);
         if (width.allocated)
             SafeFreeNULL(width.size);
     } else {
-        printf("Successfully set the resolution to %sx%s, the device will be respring.\n", height.size, width.size);
+        printf("Successfully set the resolution to %sx%s, your device will respring.\n", height.size, width.size);
         if (height.allocated)
             SafeFreeNULL(height.size);
         if (width.allocated)
             SafeFreeNULL(width.size);
-        sleep(1);
-        if (kill(pidOfProcess("/usr/libexec/backboardd"), SIGKILL)) {
+        if (kill(pidOfProcess("/usr/libexec/backboardd"), SIGTERM)) {
 			kern_return_t ret = xpc_crasher("com.apple.backboard.hid-services.xpc");
             if (ret != KERN_SUCCESS)
                 return ret;
