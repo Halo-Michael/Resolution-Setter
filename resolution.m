@@ -199,11 +199,11 @@ int main(int argc, char *argv[]) {
     lchown("/private/var/mobile/Library/Preferences/com.michael.iokit.IOMobileGraphicsFamily.plist", 501, 501);
     if (getuid())
         setuid(0);
-	if (getuid()) {
-		kern_return_t ret = xpc_crasher("com.apple.cfprefsd.daemon");
-		if (ret != KERN_SUCCESS)
-			return ret;
-	} else {
+    if (getuid()) {
+        kern_return_t ret = xpc_crasher("com.apple.cfprefsd.daemon");
+        if (ret != KERN_SUCCESS)
+            return ret;
+    } else {
         CFPreferencesSynchronize(CFSTR("com.apple.iokit.IOMobileGraphicsFamily"), CFSTR("mobile"), kCFPreferencesAnyHost);
         CFPreferencesSynchronize(CFSTR("com.michael.iokit.IOMobileGraphicsFamily"), CFSTR("mobile"), kCFPreferencesAnyHost);
     }
@@ -221,7 +221,7 @@ int main(int argc, char *argv[]) {
         if (width.allocated)
             SafeFreeNULL(width.size);
         if (kill(pidOfProcess("/usr/libexec/backboardd"), SIGTERM)) {
-			kern_return_t ret = xpc_crasher("com.apple.backboard.hid-services.xpc");
+            kern_return_t ret = xpc_crasher("com.apple.backboard.hid-services.xpc");
             if (ret != KERN_SUCCESS)
                 return ret;
         }
