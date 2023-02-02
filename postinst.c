@@ -52,5 +52,6 @@ int main() {
 		}
 	}
 
+	free(path);
     return -1;
 }
