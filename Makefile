@@ -1,9 +1,11 @@
 VERSION = 0.9.0
 Package = com.michael.resolutionsetter
-SDK = ${THEOS}/sdks/iPhoneOS13.0.sdk
-OBJCC = xcrun -sdk $(SDK) clang -arch armv7 -arch arm64 -arch arm64e -miphoneos-version-min=9.0 -F $(SDK)/System/Library/PrivateFrameworks -I${THEOS}/vendor/include -fobjc-arc -O2
-SED = gsed
-LDID = ldid
+ARCHS   = -arch armv7 -arch arm64 -arch arm64e
+SDK     = ${THEOS}/sdks/iPhoneOS13.0.sdk
+CC      = xcrun -sdk $(SDK) clang $(ARCHS) -miphoneos-version-min=9.0 -O2
+OBJCC   = $(CC) -fobjc-arc
+SED     = gsed
+LDID    = ldid
 
 .PHONY: all clean
 
@@ -37,10 +39,10 @@ resolution: clean
 	$(LDID) -Sentitlements.xml resolution
 
 ResolutionSetterRootListController: clean
-	$(OBJCC) -dynamiclib -install_name /Library/PreferenceBundles/ResolutionSetter.bundle/ResolutionSetter -framework UIKit -framework Preferences ResolutionSetterRootListController.m -o ResolutionSetter
+	$(OBJCC) -F $(SDK)/System/Library/PrivateFrameworks -I ${THEOS}/vendor/include -dynamiclib -install_name /Library/PreferenceBundles/ResolutionSetter.bundle/ResolutionSetter -framework UIKit -framework Preferences ResolutionSetterRootListController.m -o ResolutionSetter
 	strip -x ResolutionSetter
 	$(LDID) -S ResolutionSetter
 
 clean:
 	rm -rf $(Package)_*_iphoneos-arm*
-	rm -f resolution ResolutionSetter
+	rm -f postinst resolution ResolutionSetter
